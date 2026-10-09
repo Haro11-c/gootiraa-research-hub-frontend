@@ -64,7 +64,7 @@ export const EditorialPage: React.FC<EditorialPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6">
       {/* Editorial Desk Banner */}
       <div className="bg-[#0B192C] text-white rounded-2xl p-8 sm:p-10 shadow-lg border border-[#1E3E62] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-3 max-w-2xl">

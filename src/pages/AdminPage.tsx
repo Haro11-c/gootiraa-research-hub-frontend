@@ -17,6 +17,10 @@ import {
   ArrowRight,
   Search,
   Filter,
+  Eye,
+  Download,
+  BookOpen,
+  FileText,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { AdminStats, AuditLog, WithdrawalRequest } from '../types';
@@ -34,6 +38,7 @@ export const AdminPage: React.FC = () => {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('');
+  const [inspectingSub, setInspectingSub] = useState<any | null>(null);
 
   // Default active tab based on role
   const [activeTab, setActiveTab] = useState<'payouts' | 'users' | 'moderation' | 'logs' | 'providers'>(
@@ -146,7 +151,7 @@ export const AdminPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 font-sans">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 space-y-6 font-sans">
       {/* Executive Command Header */}
       <div className="bg-[#0B192C] text-white rounded-2xl p-6 sm:p-8 border border-[#1E3E62] shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="space-y-1.5">
@@ -537,16 +542,21 @@ export const AdminPage: React.FC = () => {
                   <span>License: <strong className="text-slate-700">{sub.license}</strong></span>
                 </div>
 
-                <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
-                  <input
-                    type="text"
-                    placeholder="Reviewer notes (e.g. Cleared method verification and license)..."
-                    value={reviewNotes[sub.id] || ''}
-                    onChange={(e) => setReviewNotes({ ...reviewNotes, [sub.id]: e.target.value })}
-                    className="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none"
-                  />
+                <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <button
+                    onClick={() => {
+                      setInspectingSub(sub);
+                      if (!reviewNotes[sub.id]) {
+                        setReviewNotes({ ...reviewNotes, [sub.id]: '' });
+                      }
+                    }}
+                    className="w-full sm:w-auto px-4 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 text-xs font-bold rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <Eye className="w-4 h-4 text-teal-600" />
+                    <span>Inspect & Read Manuscript</span>
+                  </button>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                     <button
                       onClick={() => handleReviewSubmission(sub.id, 'APPROVED')}
                       className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm"
@@ -556,11 +566,13 @@ export const AdminPage: React.FC = () => {
                     </button>
 
                     <button
-                      onClick={() => handleReviewSubmission(sub.id, 'REJECTED')}
+                      onClick={() => {
+                        setInspectingSub(sub);
+                      }}
                       className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm"
                     >
                       <X className="w-3.5 h-3.5" />
-                      Reject
+                      Review & Reject
                     </button>
                   </div>
                 </div>
@@ -571,6 +583,170 @@ export const AdminPage: React.FC = () => {
               ✓ All research submissions have been verified and cleared by moderators.
             </div>
           )}
+        </div>
+      )}
+
+      {/* Detailed Manuscript Review & Reading Modal */}
+      {inspectingSub && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+          <div className="relative bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] flex flex-col border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-auto">
+            {/* Header */}
+            <div className="shrink-0 bg-gradient-to-r from-[#0B192C] to-[#1E3E62] px-6 py-4 text-white flex items-center justify-between z-10 shadow-sm">
+              <div className="flex items-center gap-2.5">
+                <BookOpen className="w-5 h-5 text-teal-400" />
+                <div>
+                  <h3 className="text-base font-bold text-white leading-tight">Academic Manuscript Inspection</h3>
+                  <p className="text-xs text-slate-300">Detailed peer verification before publication clearance</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setInspectingSub(null)}
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Scrollable Body */}
+            <div className="overflow-y-auto flex-1 p-6 space-y-5">
+              {/* Title & Status */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <span className="bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded text-[11px] font-bold">
+                    Status: {inspectingSub.status}
+                  </span>
+                  <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-[11px] font-semibold">
+                    {inspectingSub.documentType}
+                  </span>
+                  <span className="text-slate-400 text-xs font-mono ml-auto">
+                    Submitted: {new Date(inspectingSub.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <h2 className="text-lg font-extrabold text-slate-900 leading-snug">
+                  {inspectingSub.title}
+                </h2>
+              </div>
+
+              {/* Submitter & Affiliation */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <span className="text-slate-500 font-medium block">Author / Submitter:</span>
+                  <strong className="text-slate-900 font-bold">{inspectingSub.submitter?.profile?.fullName || inspectingSub.submitter?.email}</strong>
+                  <span className="text-slate-500 block text-[11px] font-mono">{inspectingSub.submitter?.email}</span>
+                </div>
+                <div>
+                  <span className="text-slate-500 font-medium block">Institution / Affiliation:</span>
+                  <strong className="text-slate-900 font-bold">{inspectingSub.institution?.name || inspectingSub.submitter?.profile?.institution?.name || 'Independent Scholar'}</strong>
+                  <span className="text-slate-500 block text-[11px]">License: {inspectingSub.license}</span>
+                </div>
+              </div>
+
+              {/* Authors List */}
+              {inspectingSub.authors && inspectingSub.authors.length > 0 && (
+                <div>
+                  <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1">Declared Authors</h4>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {inspectingSub.authors.map((auth: any, i: number) => (
+                      <span key={i} className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-slate-800 font-medium">
+                        {auth.name} {auth.affiliation ? `(${auth.affiliation})` : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Full Abstract */}
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-1.5">Full Abstract</h4>
+                <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed font-serif max-h-48 overflow-y-auto">
+                  {inspectingSub.abstract}
+                </div>
+              </div>
+
+              {/* Uploaded Manuscript PDF File */}
+              {inspectingSub.files && inspectingSub.files.length > 0 && (
+                <div className="p-4 bg-teal-50/60 border border-teal-200 rounded-xl flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-teal-600 text-white flex items-center justify-center font-bold">
+                      <FileText className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-slate-900">{inspectingSub.files[0].filename}</h5>
+                      <span className="text-[11px] text-slate-500">
+                        {Math.round(inspectingSub.files[0].fileSize / 1024)} KB &bull; Verified PDF Binary
+                      </span>
+                    </div>
+                  </div>
+
+                  <a
+                    href={`/api/v1/publications/files/${inspectingSub.files[0].id}/download`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3.5 py-2 bg-teal-600 hover:bg-teal-500 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Open / Download Manuscript</span>
+                  </a>
+                </div>
+              )}
+
+              {/* Review Feedback / Decision Notes */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Reviewer Decision Notes / Rejection Reason
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Write clear feedback for the author (e.g. 'Methodology verified, cleared for publication' or 'Rejection reason: Missing institutional ethics declaration; please add and re-submit')..."
+                  value={reviewNotes[inspectingSub.id] || ''}
+                  onChange={(e) => setReviewNotes({ ...reviewNotes, [inspectingSub.id]: e.target.value })}
+                  className="w-full text-xs border border-slate-300 rounded-xl p-3 focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                />
+                <p className="text-[11px] text-slate-500">
+                  * If rejected, this feedback will be sent directly to the researcher's profile so they can revise and resubmit.
+                </p>
+              </div>
+            </div>
+
+            {/* Pinned Footer Actions */}
+            <div className="shrink-0 px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 z-10">
+              <button
+                type="button"
+                onClick={() => setInspectingSub(null)}
+                className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800"
+              >
+                Close Review
+              </button>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={async () => {
+                    if (!reviewNotes[inspectingSub.id]?.trim()) {
+                      alert('Please provide a reason/comment for rejecting this manuscript.');
+                      return;
+                    }
+                    await handleReviewSubmission(inspectingSub.id, 'REJECTED');
+                    setInspectingSub(null);
+                  }}
+                  className="px-4 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Reject Manuscript (Send Reason)</span>
+                </button>
+
+                <button
+                  onClick={async () => {
+                    await handleReviewSubmission(inspectingSub.id, 'APPROVED');
+                    setInspectingSub(null);
+                  }}
+                  className="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Approve & Grant 200 RC</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

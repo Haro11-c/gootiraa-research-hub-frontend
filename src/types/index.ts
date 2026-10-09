@@ -27,6 +27,7 @@ export interface Publication {
   isOpenAccess: boolean;
   region: 'GLOBAL' | 'ETHIOPIA' | 'PAN_AFRICA';
   status: string;
+  moderationNote?: string;
   authors: Author[];
   keywords: string[];
   references?: string[];

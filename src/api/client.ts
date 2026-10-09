@@ -121,6 +121,24 @@ class ApiClient {
     };
   }
 
+  async getPlatformStats(): Promise<{
+    publishedPublications: number;
+    registeredUsers: number;
+    registeredScholars: number;
+    totalReads: number;
+    verifiedCitations: number;
+  }> {
+    const res = await fetch(`${API_BASE}/publications/stats`);
+    const json = await res.json();
+    return json.data || {
+      publishedPublications: 0,
+      registeredUsers: 0,
+      registeredScholars: 0,
+      totalReads: 0,
+      verifiedCitations: 0,
+    };
+  }
+
   async getPublicationById(id: string): Promise<Publication> {
     return this.request(`/publications/${id}`);
   }
