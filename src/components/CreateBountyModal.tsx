@@ -63,18 +63,18 @@ export const CreateBountyModal: React.FC<CreateBountyModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+      <div className="bg-white rounded-2xl max-w-xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-4 sm:my-8">
         
         {/* Header */}
-        <div className="bg-[#0B192C] text-white p-6 flex items-center justify-between border-b border-slate-700">
+        <div className="bg-[#0B192C] text-white p-4 sm:p-6 flex items-center justify-between border-b border-slate-700">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
-              <Briefcase className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold shrink-0">
+              <Briefcase className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Create Research Bounty & Grant Call</h2>
-              <p className="text-xs text-slate-300">
+              <h2 className="text-base sm:text-lg font-bold text-white">Create Research Bounty & Grant Call</h2>
+              <p className="text-[11px] sm:text-xs text-slate-300">
                 Post sponsored academic funding challenges funded by research partners
               </p>
             </div>
@@ -88,13 +88,13 @@ export const CreateBountyModal: React.FC<CreateBountyModalProps> = ({
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+          <div className="mx-4 sm:mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
           <div>
             <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
               Bounty Challenge Title *

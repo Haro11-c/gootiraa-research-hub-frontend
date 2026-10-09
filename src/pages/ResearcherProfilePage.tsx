@@ -147,9 +147,9 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({ re
       : publications;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6 font-sans">
+    <div className="max-w-5xl mx-auto px-2.5 sm:px-6 space-y-6 font-sans w-full max-w-full overflow-hidden">
       {/* Header Profile Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-7 shadow-sm">
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-7 shadow-sm">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-start gap-4 sm:gap-5">
             {/* Avatar */}
@@ -265,7 +265,7 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({ re
               </span>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-center">
               <div className="p-3 bg-gradient-to-b from-slate-50 to-amber-50/30 rounded-xl border border-amber-200/60 shadow-xs">
                 <div className="text-xl font-black text-amber-600 font-mono">#{profile.rankings.rankCitations}</div>
                 <div className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-0.5">Rank by Citations</div>

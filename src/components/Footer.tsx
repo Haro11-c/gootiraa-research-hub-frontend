@@ -3,8 +3,8 @@ import { BookOpen, Shield, Globe, Award, ExternalLink, Heart } from 'lucide-reac
 
 export const Footer: React.FC<{ onNavigate: (tab: string) => void }> = ({ onNavigate }) => {
   return (
-    <footer className="bg-[#0B192C] text-slate-300 border-t border-[#1E3E62] pt-12 pb-8 mt-16 font-sans">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer className="bg-[#0B192C] text-slate-300 border-t border-[#1E3E62] pt-10 sm:pt-12 pb-8 mt-12 sm:mt-16 font-sans w-full max-w-full overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
           {/* Col 1: Platform Identity */}
           <div className="space-y-4">

@@ -29,14 +29,14 @@ export const App: React.FC = () => {
 
   return (
     <AuthProvider>
-      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans">
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-800 font-sans w-full max-w-full overflow-x-hidden">
         <Navbar
           currentTab={currentTab}
           onNavigate={handleNavigate}
           onOpenAuth={() => setAuthModalOpen(true)}
         />
 
-        <main className="flex-1 py-6">
+        <main className="flex-1 py-4 sm:py-6 w-full max-w-full overflow-x-hidden">
           {currentTab === 'home' && <HomePage onNavigate={handleNavigate} />}
           {currentTab === 'discovery' && (
             <DiscoveryPage initialQuery={currentParam} onNavigate={handleNavigate} />

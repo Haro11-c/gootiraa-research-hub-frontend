@@ -84,24 +84,24 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
 
   return (
     <header className="sticky top-0 z-50 bg-[#0B192C]/95 backdrop-blur-md border-b border-slate-700/60 shadow-lg shadow-black/15 transition-all">
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-4">
           
           {/* 1. Brand Logo */}
           <div
-            className="flex items-center gap-2.5 cursor-pointer shrink-0 select-none group"
+            className="flex items-center gap-2 cursor-pointer shrink-0 select-none group"
             onClick={() => onNavigate('home')}
             title="Gootiraa Research Hub — Home"
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-teal-600 via-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-teal-900/40 ring-1 ring-white/10 group-hover:scale-105 transition-transform">
-              <Layers className="w-5 h-5 text-white" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-teal-600 via-teal-500 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-teal-900/40 ring-1 ring-white/10 group-hover:scale-105 transition-transform shrink-0">
+              <Layers className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5 leading-none">
-                <span className="text-lg sm:text-xl font-black tracking-tight text-white group-hover:text-teal-200 transition-colors">
+                <span className="text-base sm:text-xl font-black tracking-tight text-white group-hover:text-teal-200 transition-colors">
                   GOOTIRAA
                 </span>
-                <span className="text-[10px] uppercase px-1.5 py-0.5 rounded-md bg-teal-500/20 text-teal-300 border border-teal-500/30 font-bold tracking-wider">
+                <span className="text-[9px] sm:text-[10px] uppercase px-1.5 py-0.5 rounded-md bg-teal-500/20 text-teal-300 border border-teal-500/30 font-bold tracking-wider">
                   Hub
                 </span>
               </div>
@@ -213,24 +213,23 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
             {isAuthenticated && (
               <button
                 onClick={() => onNavigate('profile', user?.id)}
-                className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 text-xs font-bold transition-all shadow-xs cursor-pointer group"
+                className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl flex items-center gap-1 sm:gap-1.5 text-xs font-bold transition-all shadow-xs cursor-pointer group shrink-0"
                 title="Your Research Impact Credits (RC) balance. Click to view wallet & patronage."
               >
                 <Coins className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
-                <span className="font-mono">{walletBalance}</span>
+                <span className="font-mono text-[11px] sm:text-xs">{walletBalance}</span>
                 <span className="text-[10px] text-amber-400/80 hidden sm:inline">RC</span>
               </button>
             )}
 
-            {/* Share Research Primary CTA */}
+            {/* Share Research Primary CTA (Hidden on small mobile < 640px to eliminate navbar overflow) */}
             <button
               onClick={() => onNavigate('upload')}
-              className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white text-xs font-bold px-3 sm:px-4 py-2 rounded-xl shadow-md shadow-teal-900/30 flex items-center gap-1.5 transition-all active:scale-95 shrink-0"
+              className="hidden sm:flex bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white text-xs font-bold px-3 sm:px-4 py-2 rounded-xl shadow-md shadow-teal-900/30 items-center gap-1.5 transition-all active:scale-95 shrink-0"
               title="Publish or archive your scholarly work"
             >
               <Upload className="w-3.5 h-3.5 shrink-0" />
-              <span className="whitespace-nowrap hidden sm:inline">Share Research</span>
-              <span className="whitespace-nowrap sm:hidden">Publish</span>
+              <span className="whitespace-nowrap">Share Research</span>
             </button>
 
             {/* User Session Profile & Dropdown */}
@@ -354,7 +353,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="text-xs font-semibold text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-3.5 py-2 rounded-xl border border-slate-700 transition-colors shadow-xs"
+                className="text-xs font-semibold text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-slate-700 transition-colors shadow-xs shrink-0"
               >
                 Sign In
               </button>
@@ -363,7 +362,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
             {/* Mobile Hamburger Toggle */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-700/60"
+              className="lg:hidden p-1.5 sm:p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-700/60 shrink-0"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -375,6 +374,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
       {/* Mobile Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-[#0B192C] border-b border-slate-700/80 px-4 pt-3 pb-5 space-y-3 shadow-2xl animate-in slide-in-from-top duration-200">
+          {/* Mobile Search */}
           <form onSubmit={handleSearchSubmit} className="relative w-full">
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
             <input
@@ -385,6 +385,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
               className="w-full bg-[#132A45] text-white placeholder-slate-400 text-xs rounded-xl pl-9 pr-4 py-2.5 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/30"
             />
           </form>
+
+          {/* Prominent Publish CTA in Mobile Drawer */}
+          <button
+            onClick={() => {
+              onNavigate('upload');
+              setMobileMenuOpen(false);
+            }}
+            className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow-md flex items-center justify-center gap-2 active:scale-98 transition-all"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Submit Research & Preprints</span>
+          </button>
 
           <div className="grid grid-cols-2 gap-2 pt-1">
             <button

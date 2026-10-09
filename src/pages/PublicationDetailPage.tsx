@@ -334,10 +334,10 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
         {/* Left Column: Tabs Content (2 cols) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Tabs Navigation */}
-          <div className="flex border-b border-slate-200 gap-4 text-xs font-semibold uppercase tracking-wider">
+          <div className="flex border-b border-slate-200 gap-3 sm:gap-4 text-xs font-semibold uppercase tracking-wider overflow-x-auto scrollbar-none whitespace-nowrap pb-0.5">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'overview'
                   ? 'border-teal-600 text-teal-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -349,7 +349,7 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
 
             <button
               onClick={() => setActiveTab('ai')}
-              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'ai'
                   ? 'border-teal-600 text-teal-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -361,7 +361,7 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
 
             <button
               onClick={() => setActiveTab('references')}
-              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'references'
                   ? 'border-teal-600 text-teal-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'
@@ -373,7 +373,7 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
 
             <button
               onClick={() => setActiveTab('discussion')}
-              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
                 activeTab === 'discussion'
                   ? 'border-teal-600 text-teal-700'
                   : 'border-transparent text-slate-500 hover:text-slate-800'

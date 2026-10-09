@@ -85,9 +85,9 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="space-y-12 max-w-6xl mx-auto px-4 sm:px-6">
+    <div className="space-y-8 sm:space-y-12 max-w-6xl mx-auto px-2.5 sm:px-6 w-full max-w-full overflow-hidden">
       {/* Hero Section with Interactive Research Constellation Canvas */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#0B192C] via-[#0F223D] to-[#1A365D] text-white py-16 sm:py-20 px-4 sm:px-8 -mt-6 rounded-3xl shadow-2xl border border-slate-700/50">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#0B192C] via-[#0F223D] to-[#1A365D] text-white py-12 sm:py-20 px-3.5 sm:px-8 -mt-4 sm:-mt-6 rounded-2xl sm:rounded-3xl shadow-2xl border border-slate-700/50">
         {/* Animated Moving Research Knowledge Background */}
         <ResearchConstellationCanvas />
 
@@ -95,41 +95,41 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 right-10 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-teal-900/60 border border-teal-500/40 text-teal-300 text-xs font-semibold tracking-wide backdrop-blur-sm shadow-sm">
-            <Globe2 className="w-3.5 h-3.5 text-teal-400" />
-            <span>Advancing Pan-African & Global Scientific Communication</span>
+        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-5 sm:space-y-6">
+          <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 py-1 rounded-full bg-teal-900/60 border border-teal-500/40 text-teal-300 text-[11px] sm:text-xs font-semibold tracking-wide backdrop-blur-sm shadow-sm max-w-full">
+            <Globe2 className="w-3.5 h-3.5 text-teal-400 shrink-0" />
+            <span className="truncate">Advancing Pan-African & Global Scientific Communication</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-2xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
             Discover, Verify, and Share <br />
             <span className="text-teal-400 font-serif italic">Scholarly Research</span>
           </h1>
 
-          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
             The open academic repository and empirical science journalism hub for researchers, universities,
             and evidence-seeking citizens across Ethiopia and the world.
           </p>
 
           {/* Search Box */}
-          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mt-4">
-            <div className="flex bg-white rounded-xl shadow-2xl p-1.5 border border-slate-300 focus-within:ring-2 focus-within:ring-teal-400">
-              <div className="relative flex-1 flex items-center">
-                <Search className="w-5 h-5 text-slate-400 absolute left-3.5" />
+          <form onSubmit={handleSearchSubmit} className="max-w-2xl mx-auto mt-3 sm:mt-4 w-full">
+            <div className="flex bg-white rounded-xl shadow-2xl p-1 sm:p-1.5 border border-slate-300 focus-within:ring-2 focus-within:ring-teal-400">
+              <div className="relative flex-1 flex items-center min-w-0">
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 absolute left-2.5 sm:left-3.5 shrink-0" />
                 <input
                   type="text"
-                  placeholder="Search by paper title, abstract, author, DOI, or subject..."
+                  placeholder="Search papers, DOIs, authors, topics..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full text-slate-900 placeholder-slate-400 text-sm pl-11 pr-4 py-2.5 rounded-lg focus:outline-none"
+                  className="w-full text-slate-900 placeholder-slate-400 text-xs sm:text-sm pl-8 sm:pl-11 pr-2 sm:pr-4 py-2 sm:py-2.5 rounded-lg focus:outline-none min-w-0"
                 />
               </div>
               <button
                 type="submit"
-                className="bg-teal-600 hover:bg-teal-500 text-white font-medium text-sm px-6 py-2.5 rounded-lg shadow-sm flex items-center gap-1.5 transition-all shrink-0"
+                className="bg-teal-600 hover:bg-teal-500 text-white font-medium text-xs sm:text-sm px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-lg shadow-sm flex items-center gap-1 sm:gap-1.5 transition-all shrink-0"
               >
                 <span>Search</span>
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </button>
             </div>
           </form>
@@ -207,8 +207,8 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
       </section>
 
       {/* Ethiopian & African Research Spotlight */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between mb-6">
+      <section className="max-w-7xl mx-auto px-1 sm:px-6 lg:px-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 rounded-full bg-teal-600"></span>
@@ -220,7 +220,7 @@ export const HomePage: React.FC<HomePageProps> = ({ onNavigate }) => {
           </div>
           <button
             onClick={() => onNavigate('discovery', 'ethiopia')}
-            className="text-xs font-semibold text-teal-700 hover:text-teal-800 flex items-center gap-1"
+            className="text-xs font-semibold text-teal-700 hover:text-teal-800 flex items-center gap-1 w-fit"
           >
             Explore all regional papers <ArrowRight className="w-3.5 h-3.5" />
           </button>

@@ -135,18 +135,18 @@ export const CreateArticleModal: React.FC<CreateArticleModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl max-w-3xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-8">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4">
+      <div className="bg-white rounded-2xl max-w-3xl w-full border border-slate-200 shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 my-4 sm:my-8">
         
         {/* Header */}
-        <div className="bg-[#0B192C] text-white p-6 flex items-center justify-between border-b border-slate-700">
+        <div className="bg-[#0B192C] text-white p-4 sm:p-6 flex items-center justify-between border-b border-slate-700">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white">
-              <Newspaper className="w-5 h-5" />
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-teal-600 flex items-center justify-center text-white shrink-0">
+              <Newspaper className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">Write & Publish Science Editorial</h2>
-              <p className="text-xs text-slate-300">
+              <h2 className="text-base sm:text-lg font-bold text-white">Write & Publish Science Editorial</h2>
+              <p className="text-[11px] sm:text-xs text-slate-300">
                 Independent investigative journalism, explainer, or empirical fact-check
               </p>
             </div>
@@ -161,14 +161,14 @@ export const CreateArticleModal: React.FC<CreateArticleModalProps> = ({
 
         {/* Error Alert */}
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
+          <div className="mx-4 sm:mx-6 mt-4 p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 max-h-[75vh] overflow-y-auto">
           
           {/* Row 1: Title */}
           <div>
