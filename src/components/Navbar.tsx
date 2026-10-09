@@ -15,6 +15,7 @@ import {
   Clock,
   PanelLeftClose,
   PanelLeftOpen,
+  X,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -35,6 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [lang, setLang] = useState<'EN' | 'AM' | 'OM'>('EN');
   const [searchFocused, setSearchFocused] = useState(false);
@@ -132,10 +134,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </div>
           </div>
 
-          {/* 2. Global Unified Search Bar (Spacious Center with min-w-0 for mobile safety) */}
+          {/* 2. Global Unified Search Bar (Desktop / Tablet >= md) */}
           <form
             onSubmit={handleSearchSubmit}
-            className={`flex items-center flex-1 min-w-0 max-w-sm md:max-w-md lg:max-w-xl mx-1 sm:mx-3 transition-all duration-200 ${
+            className={`hidden md:flex items-center flex-1 min-w-0 max-w-sm md:max-w-md lg:max-w-xl mx-2 sm:mx-4 transition-all duration-200 ${
               searchFocused ? 'max-w-md md:max-w-lg lg:max-w-2xl' : ''
             }`}
           >
@@ -164,7 +166,25 @@ export const Navbar: React.FC<NavbarProps> = ({
           </form>
 
           {/* 3. Right Utility Section */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            {/* Mobile Search Toggle Icon (< md) */}
+            <button
+              onClick={() => {
+                setMobileSearchOpen(!mobileSearchOpen);
+                if (!mobileSearchOpen) {
+                  setTimeout(() => searchInputRef.current?.focus(), 100);
+                }
+              }}
+              className="md:hidden p-1.5 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-700/60 transition-colors shadow-xs"
+              title={mobileSearchOpen ? 'Close Search' : 'Search repository'}
+              aria-label="Toggle Search"
+            >
+              {mobileSearchOpen ? (
+                <X className="w-4 h-4 text-teal-400" />
+              ) : (
+                <Search className="w-4 h-4 text-teal-400" />
+              )}
+            </button>
             
             {/* Language Switcher Pill */}
             <div className="relative hidden md:block">
@@ -342,6 +362,33 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Mobile Search Dropdown Bar (< md) */}
+      {mobileSearchOpen && (
+        <div className="md:hidden px-3 py-2 bg-[#0B192C] border-t border-slate-700/80 animate-in slide-in-from-top-2 duration-150">
+          <form onSubmit={handleSearchSubmit} className="relative w-full">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-teal-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search papers, DOIs, scholars..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-[#132A45] text-white placeholder-slate-400 text-xs rounded-xl pl-9 pr-8 py-2 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/40 shadow-inner"
+              autoFocus
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white p-0.5"
+                title="Clear query"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </form>
+        </div>
+      )}
     </header>
   );
 };

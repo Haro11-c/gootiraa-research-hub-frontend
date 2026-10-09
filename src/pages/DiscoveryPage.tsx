@@ -15,6 +15,8 @@ import {
   RefreshCw,
   AlertCircle,
   FileText,
+  Eye,
+  Quote,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { Publication, Author } from '../types';
@@ -235,41 +237,47 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
         {publications.map((pub) => (
           <article
             key={pub.id}
-            className="bg-white rounded-xl border border-slate-200 hover:border-teal-400 p-6 shadow-sm transition-all space-y-3"
+            className="bg-white rounded-xl border border-slate-200 hover:border-teal-400 p-4 sm:p-6 shadow-sm transition-all space-y-3"
           >
             {/* Badges & Meta */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <span
-                  className={`font-semibold px-2.5 py-0.5 rounded text-[11px] ${
+                  className={`font-semibold px-2.5 py-0.5 rounded text-[11px] whitespace-nowrap ${
                     pub.reviewStatus === 'PEER_REVIEWED'
                       ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                       : 'bg-amber-50 text-amber-800 border border-amber-200'
                   }`}
                 >
-                  {pub.reviewStatus === 'PEER_REVIEWED' ? '✓ Peer-Reviewed Article' : 'Preprint (Unreviewed)'}
+                  {pub.reviewStatus === 'PEER_REVIEWED' ? '✓ Peer-Reviewed' : 'Preprint (Unreviewed)'}
                 </span>
 
-                <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] font-medium">
-                  {pub.documentType.replace(/_/g, ' ')}
-                </span>
+                {pub.documentType && pub.documentType !== 'PEER_REVIEWED_ARTICLE' && (
+                  <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] font-medium whitespace-nowrap">
+                    {pub.documentType.replace(/_/g, ' ')}
+                  </span>
+                )}
 
                 {pub.isOpenAccess && (
-                  <span className="bg-teal-50 text-teal-800 px-2 py-0.5 rounded text-[11px] font-medium border border-teal-200">
+                  <span className="bg-teal-50 text-teal-800 px-2 py-0.5 rounded text-[11px] font-medium border border-teal-200 whitespace-nowrap">
                     Open Access
                   </span>
                 )}
 
                 {pub.region === 'ETHIOPIA' && (
-                  <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-[11px] font-medium border border-blue-200">
-                    Ethiopia / Horn of Africa
+                  <span className="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-[11px] font-medium border border-blue-200 whitespace-nowrap">
+                    🇪🇹 Horn of Africa
                   </span>
                 )}
               </div>
 
-              <div className="text-slate-400 font-mono text-xs">
+              <div className="text-slate-400 font-mono text-[11px] sm:text-xs flex items-center gap-2 sm:gap-3 shrink-0">
                 <span>Year: {pub.publicationYear}</span>
-                {pub.doi && <span className="ml-3">DOI: {pub.doi}</span>}
+                {pub.doi && (
+                  <span className="truncate max-w-[130px] sm:max-w-[220px]" title={pub.doi}>
+                    DOI: {pub.doi}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -327,16 +335,25 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
 
             {/* Footer row with stats and actions */}
             <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500">
-              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
-                <span>Citations: <strong className="text-slate-800">{pub.metricsCitations}</strong></span>
-                <span>Views: <strong className="text-slate-800">{pub.metricsViews}</strong></span>
-                <span>Downloads: <strong className="text-slate-800">{pub.metricsDownloads}</strong></span>
+              <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-4 text-[11px] sm:text-xs">
+                <span className="flex items-center gap-1">
+                  <Quote className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span>Citations: <strong className="text-slate-800">{pub.metricsCitations}</strong></span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <Eye className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span>Views: <strong className="text-slate-800">{pub.metricsViews}</strong></span>
+                </span>
+                <span className="flex items-center gap-1">
+                  <Download className="w-3 h-3 text-slate-400 shrink-0" />
+                  <span>Downloads: <strong className="text-slate-800">{pub.metricsDownloads}</strong></span>
+                </span>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="grid grid-cols-3 sm:flex items-center gap-2 w-full sm:w-auto">
                 <button
                   onClick={() => setSelectedForExport(pub)}
-                  className="px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded flex items-center gap-1 font-medium text-xs"
+                  className="px-2.5 py-1.5 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center justify-center gap-1 font-medium text-xs transition-colors"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Cite</span>
@@ -344,7 +361,7 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
 
                 <button
                   onClick={() => toggleBookmark(pub.id)}
-                  className={`px-2.5 py-1 rounded flex items-center gap-1 font-medium text-xs transition-colors ${
+                  className={`px-2.5 py-1.5 rounded-lg flex items-center justify-center gap-1 font-medium text-xs transition-colors ${
                     bookmarkedIds.has(pub.id)
                       ? 'bg-teal-50 text-teal-700 border border-teal-200'
                       : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
@@ -356,7 +373,7 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
 
                 <button
                   onClick={() => onNavigate('publication', pub.id)}
-                  className="px-3 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded font-medium text-xs transition-colors"
+                  className="px-3 py-1.5 bg-teal-600 hover:bg-teal-500 text-white rounded-lg font-medium text-xs text-center transition-colors shadow-xs"
                 >
                   View Details
                 </button>
@@ -381,26 +398,26 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
             {externalResults.map((ext, idx) => (
               <div
                 key={idx}
-                className="bg-slate-50/70 border border-dashed border-slate-300 rounded-xl p-5 space-y-2 hover:bg-white transition-colors"
+                className="bg-slate-50/70 border border-dashed border-slate-300 rounded-xl p-4 sm:p-5 space-y-2 hover:bg-white transition-colors"
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-semibold text-[11px]">
+                  <span className="bg-indigo-50 text-indigo-700 border border-indigo-200 px-2 py-0.5 rounded font-semibold text-[11px] whitespace-nowrap">
                     Provider: {ext.source}
                   </span>
                   <span className="text-slate-400 font-mono text-[11px]">{ext.publicationYear}</span>
                 </div>
 
-                <h4 className="font-bold text-slate-900 text-sm">{ext.title}</h4>
-                <p className="text-xs text-slate-600 line-clamp-2">{ext.abstract}</p>
+                <h4 className="font-bold text-slate-900 text-sm leading-snug">{ext.title}</h4>
+                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">{ext.abstract}</p>
 
-                <div className="pt-2 flex items-center justify-between text-xs text-slate-500">
-                  <span>Venue: {ext.venue || 'Indexed Scholarly Repository'}</span>
+                <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+                  <span className="truncate max-w-[200px] sm:max-w-none">Venue: {ext.venue || 'Indexed Scholarly Repository'}</span>
                   {ext.doi && (
                     <a
                       href={`https://doi.org/${ext.doi}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-teal-600 hover:underline flex items-center gap-1"
+                      className="text-teal-600 hover:underline flex items-center gap-1 shrink-0"
                     >
                       <span>DOI Resolver</span>
                       <ExternalLink className="w-3 h-3" />

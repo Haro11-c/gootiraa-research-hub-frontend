@@ -157,49 +157,61 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
       <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-7 shadow-sm">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-start gap-4 sm:gap-5">
-            {/* Avatar */}
-            <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-[#0B192C] text-white flex items-center justify-center text-2xl font-bold shadow-md shrink-0 border border-slate-700">
-              {profile.fullName?.[0] || 'R'}
+            {/* Avatar with academic gradient & verified check badge */}
+            <div className="relative shrink-0">
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-gradient-to-tr from-[#0B192C] via-[#1E3E62] to-teal-700 text-white flex items-center justify-center text-2xl sm:text-3xl font-black shadow-lg shadow-teal-950/25 ring-2 ring-teal-500/30 border border-slate-700/60 select-none">
+                {profile.fullName?.[0] || 'R'}
+              </div>
+              {profile.verifiedStatus === 'VERIFIED' && (
+                <div
+                  className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center ring-2 ring-white shadow-sm"
+                  title="Verified Scholar Identity"
+                >
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                </div>
+              )}
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1.5 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">{profile.fullName}</h1>
+                <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
+                  {profile.fullName}
+                </h1>
                 {profile.verifiedStatus === 'VERIFIED' ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full whitespace-nowrap">
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                     Verified Scholar
                   </span>
                 ) : profile.verifiedStatus === 'PENDING' ? (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full animate-pulse">
-                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full animate-pulse whitespace-nowrap">
+                    <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     Verification In Review
                   </span>
                 ) : null}
               </div>
 
-              <p className="text-xs sm:text-sm font-medium text-slate-700">
+              <p className="text-xs sm:text-sm font-semibold text-teal-800">
                 {profile.academicTitle || 'Academic Researcher'}
               </p>
 
               {profile.institution && (
-                <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                  <Building className="w-3.5 h-3.5 text-slate-400" />
-                  <span>{profile.institution.name} {profile.department ? `— ${profile.department}` : ''}</span>
+                <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                  <Building className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                  <span className="truncate">{profile.institution.name} {profile.department ? `— ${profile.department}` : ''}</span>
                 </div>
               )}
 
               {profile.orcidId && (
                 <div className="flex items-center gap-1 text-xs text-green-700 font-mono pt-0.5">
-                  <Award className="w-3.5 h-3.5" />
+                  <Award className="w-3.5 h-3.5 shrink-0" />
                   <a
                     href={`https://orcid.org/${profile.orcidId}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:underline flex items-center gap-0.5"
+                    className="hover:underline flex items-center gap-0.5 truncate"
                   >
                     ORCID: {profile.orcidId}
-                    <ExternalLink className="w-3 h-3 ml-0.5" />
+                    <ExternalLink className="w-3 h-3 ml-0.5 shrink-0" />
                   </a>
                 </div>
               )}
@@ -207,24 +219,24 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap items-center gap-2.5 shrink-0 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 shrink-0 w-full sm:w-auto pt-2 md:pt-0">
             {!isOwnProfile ? (
               <>
                 {/* Tip Scholar Button */}
                 <button
                   onClick={() => setTipModalOpen(true)}
-                  className="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+                  className="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-xs transition-all"
                 >
-                  <Coins className="w-4 h-4" />
+                  <Coins className="w-3.5 h-3.5" />
                   <span>Support Lab / Tip</span>
                 </button>
 
                 <button
                   onClick={handleToggleFollow}
-                  className={`px-4 py-2 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors ${
+                  className={`px-3.5 py-1.5 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors ${
                     isFollowing
                       ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      : 'bg-teal-600 hover:bg-teal-500 text-white shadow-sm'
+                      : 'bg-teal-600 hover:bg-teal-500 text-white shadow-xs'
                   }`}
                 >
                   {isFollowing ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
@@ -233,29 +245,29 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
 
                 <button
                   onClick={() => setCollabModalOpen(true)}
-                  className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
+                  className="px-3.5 py-1.5 border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition-colors"
                 >
                   <Mail className="w-3.5 h-3.5" />
                   <span>Request Collaboration</span>
                 </button>
               </>
             ) : (
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3 py-1.5 bg-teal-50 text-teal-800 text-xs font-bold rounded-lg border border-teal-200 flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <span className="px-3 py-1.5 bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 flex items-center gap-1.5">
                   <User className="w-3.5 h-3.5 text-teal-600" />
                   Your Author Profile
                 </span>
                 {profile.verifiedStatus === 'UNVERIFIED' && onOpenVerification && (
                   <button
                     onClick={onOpenVerification}
-                    className="px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all active:scale-95"
+                    className="px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-all active:scale-95"
                   >
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
                     <span>Request Scholar Verification</span>
                   </button>
                 )}
                 {profile.verifiedStatus === 'PENDING' && (
-                  <span className="px-3 py-1.5 bg-amber-50 text-amber-800 text-xs font-semibold rounded-lg border border-amber-300 flex items-center gap-1.5">
+                  <span className="px-3 py-1.5 bg-amber-50 text-amber-800 text-xs font-semibold rounded-xl border border-amber-300 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-amber-600" />
                     Verification Under Review
                   </span>
@@ -263,7 +275,7 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
                 {wallet && (
                   <button
                     onClick={() => setWithdrawalModalOpen(true)}
-                    className="px-4 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-colors"
+                    className="px-3.5 py-1.5 bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold rounded-xl shadow-xs flex items-center gap-1.5 transition-colors"
                   >
                     <ArrowDownRight className="w-3.5 h-3.5" />
                     <span>Redeem Credits ({wallet.balanceCredits} RC)</span>
@@ -290,23 +302,23 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3 text-center">
-              <div className="p-3 bg-gradient-to-b from-slate-50 to-amber-50/30 rounded-xl border border-amber-200/60 shadow-xs">
-                <div className="text-xl font-black text-amber-600 font-mono">#{profile.rankings.rankCitations}</div>
-                <div className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-0.5">Rank by Citations</div>
-                <div className="text-[9px] text-slate-400 mt-0.5">Top {profile.rankings.percentile}% Globally</div>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+              <div className="p-2.5 sm:p-3 bg-gradient-to-b from-slate-50 to-amber-50/40 rounded-xl border border-amber-200/70 shadow-xs">
+                <div className="text-base sm:text-xl font-black text-amber-600 font-mono">#{profile.rankings.rankCitations}</div>
+                <div className="text-[9px] sm:text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-0.5 leading-tight">Citations Rank</div>
+                <div className="text-[8px] sm:text-[9px] text-slate-400 mt-0.5 hidden xs:block">Top {profile.rankings.percentile}% Globally</div>
               </div>
 
-              <div className="p-3 bg-gradient-to-b from-slate-50 to-teal-50/30 rounded-xl border border-teal-200/60 shadow-xs">
-                <div className="text-xl font-black text-teal-600 font-mono">#{profile.rankings.rankPublications}</div>
-                <div className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-0.5">Rank by Papers</div>
-                <div className="text-[9px] text-slate-400 mt-0.5">{profile.publicationsCount || publications.length} Published Works</div>
+              <div className="p-2.5 sm:p-3 bg-gradient-to-b from-slate-50 to-teal-50/40 rounded-xl border border-teal-200/70 shadow-xs">
+                <div className="text-base sm:text-xl font-black text-teal-600 font-mono">#{profile.rankings.rankPublications}</div>
+                <div className="text-[9px] sm:text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-0.5 leading-tight">Papers Rank</div>
+                <div className="text-[8px] sm:text-[9px] text-slate-400 mt-0.5 hidden xs:block">{profile.publicationsCount || publications.length} Works</div>
               </div>
 
-              <div className="p-3 bg-gradient-to-b from-slate-50 to-blue-50/30 rounded-xl border border-blue-200/60 shadow-xs">
-                <div className="text-xl font-black text-blue-600 font-mono">#{profile.rankings.rankViews}</div>
-                <div className="text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-0.5">Rank by Reads</div>
-                <div className="text-[9px] text-slate-400 mt-0.5">{profile.viewsCount || 0} Total Impressions</div>
+              <div className="p-2.5 sm:p-3 bg-gradient-to-b from-slate-50 to-blue-50/40 rounded-xl border border-blue-200/70 shadow-xs">
+                <div className="text-base sm:text-xl font-black text-blue-600 font-mono">#{profile.rankings.rankViews}</div>
+                <div className="text-[9px] sm:text-[10px] text-slate-600 font-bold uppercase tracking-wider mt-0.5 leading-tight">Reads Rank</div>
+                <div className="text-[8px] sm:text-[9px] text-slate-400 mt-0.5 hidden xs:block">{profile.viewsCount || 0} Impressions</div>
               </div>
             </div>
           </div>
@@ -588,7 +600,7 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
               return (
                 <div
                   key={pub.id}
-                  className={`bg-white rounded-xl border p-5 transition-all space-y-3 shadow-sm ${
+                  className={`bg-white rounded-xl border p-4 sm:p-5 transition-all space-y-3 shadow-sm ${
                     isRejected
                       ? 'border-red-200 ring-1 ring-red-100'
                       : isPending
@@ -597,9 +609,9 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
                   }`}
                 >
                   <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-1.5">
                       <span
-                        className={`font-semibold px-2 py-0.5 rounded text-[11px] ${
+                        className={`font-semibold px-2 py-0.5 rounded text-[11px] whitespace-nowrap ${
                           pub.reviewStatus === 'PEER_REVIEWED'
                             ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                             : 'bg-amber-50 text-amber-800 border border-amber-200'
@@ -610,7 +622,7 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
 
                       {/* Status Badge */}
                       <span
-                        className={`font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider ${
+                        className={`font-bold px-2 py-0.5 rounded text-[10px] uppercase tracking-wider whitespace-nowrap ${
                           isRejected
                             ? 'bg-red-100 text-red-800 border border-red-300'
                             : isPending
@@ -618,7 +630,7 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
                             : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                         }`}
                       >
-                        {isRejected ? 'Revision Required / Rejected' : isPending ? '⏳ Under Academic Review' : '✓ Published'}
+                        {isRejected ? 'Revision Required' : isPending ? '⏳ In Review' : '✓ Published'}
                       </span>
                     </div>
 
@@ -631,7 +643,7 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
                         onNavigate('publication', pub.id);
                       }
                     }}
-                    className={`font-bold text-slate-900 text-sm sm:text-base ${
+                    className={`font-bold text-slate-900 text-sm sm:text-base leading-snug ${
                       !isPending && !isRejected ? 'hover:text-teal-700 cursor-pointer' : ''
                     }`}
                   >
@@ -642,22 +654,22 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
 
                   {/* Rejection / Revision Required Notice Box with Reason from Moderator */}
                   {isRejected && (
-                    <div className="bg-red-50/90 border border-red-200 rounded-xl p-4 space-y-2.5 mt-2">
+                    <div className="bg-red-50/90 border border-red-200 rounded-xl p-3.5 space-y-2 mt-2">
                       <div className="flex items-center gap-2 text-red-900 font-bold text-xs">
                         <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                        <span>Editorial Review Committee Feedback & Rejection Details</span>
+                        <span>Editorial Review Feedback & Notes</span>
                       </div>
-                      <div className="bg-white p-3 rounded-lg border border-red-200 text-xs text-red-950 font-medium leading-relaxed">
+                      <div className="bg-white p-2.5 rounded-lg border border-red-200 text-xs text-red-950 font-medium leading-relaxed">
                         <span className="font-bold text-red-800 block text-[11px] uppercase tracking-wider mb-0.5">
-                          Reason Provided by Academic Moderator:
+                          Moderator Note:
                         </span>
                         &ldquo;{pub.moderationNote || 'Manuscript did not pass open repository verification standards. Please review methodology, copyright licensing, or complete author declarations.'}&rdquo;
                       </div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 text-[11px] text-slate-600">
-                        <span>Please correct the issues cited above and submit an updated manuscript file.</span>
+                        <span>Please update manuscript file to resubmit.</span>
                         <button
                           onClick={() => onNavigate('upload')}
-                          className="px-3.5 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-colors shrink-0"
+                          className="px-3 py-1.5 bg-red-600 hover:bg-red-500 text-white font-bold text-xs rounded-lg shadow-xs flex items-center justify-center gap-1.5 transition-colors shrink-0"
                         >
                           <RotateCcw className="w-3.5 h-3.5" />
                           <span>Revise & Resubmit &rarr;</span>
@@ -682,9 +694,9 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
                   )}
 
                   {/* Footer Stats & Actions */}
-                  <div className="pt-2 flex items-center justify-between text-xs text-slate-500">
+                  <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
                     <span>Citations: <strong>{pub.metricsCitations || 0}</strong></span>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5">
                       {!isOwnProfile && pub.status === 'PUBLISHED' && (
                         <button
                           onClick={() => {
