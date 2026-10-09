@@ -10,7 +10,14 @@ import {
   AuditLog,
 } from '../types';
 
-const API_BASE = '/api/v1';
+const getApiBase = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (!envUrl) return '/api/v1';
+  const clean = envUrl.replace(/\/$/, '');
+  return clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
+};
+
+const API_BASE = getApiBase();
 
 class ApiClient {
   private getToken(): string | null {

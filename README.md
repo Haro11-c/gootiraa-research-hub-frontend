@@ -1,37 +1,77 @@
-# gootiraa-research-hub-frontend
+# Gootiraa Research Hub (ጎቲራ) — Frontend
 
-**Gootiraa Research Hub (ጎቲራ) — Scholarly Repository & Science Journalism Frontend**
+> **Scholarly Repository, Open Science & Independent Science Journalism**
 
-An open, high-integrity academic discovery platform and science journalism portal combining researcher profiles, publication discovery, empirical fact-checking, and evidence-grounded AI workflows.
+An open, high-integrity academic discovery platform and science journalism portal combining researcher profiles, publication discovery, author patronage, empirical fact-checking, and evidence-grounded AI workflows.
 
-## Features
+---
 
-- **Academic Design System**: Scholarly Navy (`#0B192C`), Deep Blue (`#1E3E62`), and Academic Teal (`#0D9488`).
-- **Discovery & Search**: Multi-field queries across title, author, abstract, DOI, and keywords with facets for document type, review status, open access, and Ethiopian/African scholarship.
-- **Publication Detail**: Full abstract, verified review status badges, citation export (**BibTeX**, **RIS**, **APA 7th**, **IEEE**), discussion, and PDF download.
-- **Researcher Profiles**: Academic affiliation, biography, verified badges, and **ORCID** linking.
-- **Multi-Step Submission Wizard**: Ingest papers with PDF verification, metadata review, co-authorship declaration, and Creative Commons licensing.
-- **Editorial & Fact-Check Desk**: Science news, explainers, IFCN-inspired fact-checks with verdict badges, and transparent correction history.
-- **Grounded AI Assistant Workspace**: Passage-grounded paper summaries, side-by-side comparison, terminology explainer, and citation anchors.
-- **Administration & Moderation**: Submission queue triage, audit log viewer, and external provider health monitor.
+## 🌐 Live Web App Deployments
 
-## Getting Started
+| Component | Platform | Live URL | Status |
+| :--- | :--- | :--- | :--- |
+| **Web App (Frontend)** | **Vercel** | [https://gootiraa-research-hub-frontend.vercel.app](https://gootiraa-research-hub-frontend.vercel.app) | 🟢 Production Ready |
+| **API Backend** | **Render** | [https://gootiraa-research-hub-backend.onrender.com](https://gootiraa-research-hub-backend.onrender.com) | 🟢 API Live |
+| **API Health Check** | **Render** | [https://gootiraa-research-hub-backend.onrender.com/api/v1/health](https://gootiraa-research-hub-backend.onrender.com/api/v1/health) | 🟢 Health OK |
+
+---
+
+## 🚀 How to Deploy on Vercel (1-Click Guide)
+
+You can deploy this frontend directly to your **Vercel** account in under 2 minutes:
+
+1. Log into your [Vercel Dashboard](https://vercel.com/dashboard).
+2. Click **"Add New..."** → **"Project"**.
+3. Select your GitHub repository: `Haro11-c/gootiraa-research-hub-frontend`.
+4. Configure the Project Settings:
+   - **Framework Preset**: `Vite`
+   - **Root Directory**: `./` (leave default)
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+5. Add the **Environment Variable**:
+   - `VITE_API_BASE_URL` = `https://gootiraa-research-hub-backend.onrender.com` *(your Render backend URL)*
+6. Click **Deploy**! 
+
+*Note: The included [`vercel.json`](./vercel.json) automatically handles single-page application (SPA) routing, so all deep links (`/discovery`, `/editorial`, `/admin`, `/policy`) load smoothly without 404 errors.*
+
+---
+
+## 💻 Local Development
 
 ```bash
-# Install dependencies
+# 1. Clone repository
+git clone https://github.com/Haro11-c/gootiraa-research-hub-frontend.git
+cd gootiraa-research-hub-frontend
+
+# 2. Install dependencies
 npm install
 
-# Run development server
+# 3. Start local development server
 npm run dev
+# App will run at http://localhost:3000 (or http://localhost:5173)
 
-# Build production bundle
+# 4. Build production bundle
 npm run build
 ```
 
-## Tech Stack
+---
 
-- React 18
-- TypeScript
-- Tailwind CSS
-- Lucide React
-- Vite
+## 🔑 Demo Access Accounts
+
+All accounts use password: **`Gootiraa2026Secure!`**
+
+| Role | Email | Description |
+| :--- | :--- | :--- |
+| **Super Admin** | `superadmin@gootiraa.org` | Financial payouts, anti-fraud telemetry, user roles |
+| **Moderator / Editor** | `admin@gootiraa.org` | Manuscript approvals, publishing science news & fact-checks |
+| **Senior Scholar** | `almaz.bekele@aau.edu.et` | Dr. Almaz Bekele (AAU) — Top 1% Ranked Researcher |
+| **Active Scholar** | `harouturakerro@gmail.com` | Haro Utura — Research contributor & impact wallet |
+
+---
+
+## 🛠️ Tech Stack
+- **Framework**: React 18 + Vite
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Icons**: Lucide React
+- **Deployment**: Vercel (SPA routing via `vercel.json`)
