@@ -17,8 +17,9 @@ import {
   FileText,
 } from 'lucide-react';
 import { api } from '../api/client';
-import { Publication } from '../types';
+import { Publication, Author } from '../types';
 import { CitationExportModal } from '../components/CitationExportModal';
+import { AuthorDetailModal } from '../components/AuthorDetailModal';
 import { useAuth } from '../context/AuthContext';
 
 interface DiscoveryPageProps {
@@ -37,6 +38,11 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
   const [yearTo, setYearTo] = useState('');
   const [sort, setSort] = useState<'newest' | 'citations' | 'views' | 'relevance'>('relevance');
   const [page, setPage] = useState(1);
+
+  // Author details modal state
+  const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
+  const [selectedSubmitter, setSelectedSubmitter] = useState<any | null>(null);
+  const [authorModalOpen, setAuthorModalOpen] = useState(false);
 
   const [publications, setPublications] = useState<Publication[]>([]);
   const [externalResults, setExternalResults] = useState<any[]>([]);
@@ -279,10 +285,20 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
             <div className="text-xs text-slate-600 flex flex-wrap items-center gap-1.5">
               <span className="font-medium text-slate-500">Authors:</span>
               {pub.authors?.map((a, i) => (
-                <span key={i} className="text-slate-800 font-medium hover:text-teal-700">
-                  {a.name}
-                  {i < (pub.authors?.length || 0) - 1 ? ',' : ''}
-                </span>
+                <button
+                  key={i}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedAuthor(a);
+                    setSelectedSubmitter(pub.submitter || null);
+                    setAuthorModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1 text-slate-800 font-semibold hover:text-teal-700 bg-slate-50 hover:bg-teal-50 px-2 py-0.5 rounded-lg border border-slate-200/80 transition-colors cursor-pointer"
+                  title="Click to view author profile, affiliations & follow"
+                >
+                  <span>{a.name}</span>
+                </button>
               ))}
               {pub.venue && (
                 <span className="text-slate-500 italic ml-2">&bull; {pub.venue}</span>
@@ -443,6 +459,21 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
           publication={selectedForExport}
           isOpen={!!selectedForExport}
           onClose={() => setSelectedForExport(null)}
+        />
+      )}
+
+      {/* Author Details Modal */}
+      {authorModalOpen && selectedAuthor && (
+        <AuthorDetailModal
+          isOpen={authorModalOpen}
+          onClose={() => {
+            setAuthorModalOpen(false);
+            setSelectedAuthor(null);
+            setSelectedSubmitter(null);
+          }}
+          author={selectedAuthor}
+          submitter={selectedSubmitter}
+          onNavigate={onNavigate}
         />
       )}
     </div>

@@ -7,11 +7,13 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   bookmarkedIds: Set<string>;
+  followingIds: Set<string>;
   login: (email: string, pass: string) => Promise<void>;
   register: (data: any) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   toggleBookmark: (pubId: string) => Promise<boolean>;
+  toggleFollow: (authorId: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,6 +22,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<string>>(new Set());
+  const [followingIds, setFollowingIds] = useState<Set<string>>(new Set());
 
   const refreshUser = async () => {
     try {
@@ -29,12 +32,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (currentUser.bookmarkedPublicationIds) {
           setBookmarkedIds(new Set(currentUser.bookmarkedPublicationIds));
         }
+        if (currentUser.followingIds) {
+          setFollowingIds(new Set(currentUser.followingIds));
+        }
       } else {
         setUser(null);
+        setFollowingIds(new Set());
       }
     } catch (err) {
       api.clearToken();
       setUser(null);
+      setFollowingIds(new Set());
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     api.clearToken();
     setUser(null);
     setBookmarkedIds(new Set());
+    setFollowingIds(new Set());
   };
 
   const toggleBookmark = async (pubId: string): Promise<boolean> => {
@@ -77,6 +86,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return res.bookmarked;
   };
 
+  const toggleFollow = async (authorId: string): Promise<boolean> => {
+    if (!user) throw new Error('Authentication required to follow researchers.');
+    const res = await api.toggleFollow(authorId);
+    setFollowingIds((prev) => {
+      const next = new Set(prev);
+      if (res.following) {
+        next.add(authorId);
+      } else {
+        next.delete(authorId);
+      }
+      return next;
+    });
+    return res.following;
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -84,11 +108,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         isAuthenticated: !!user,
         isLoading,
         bookmarkedIds,
+        followingIds,
         login,
         register,
         logout,
         refreshUser,
         toggleBookmark,
+        toggleFollow,
       }}
     >
       {children}

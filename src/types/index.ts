@@ -2,6 +2,8 @@ export interface Author {
   name: string;
   affiliation?: string;
   orcid?: string;
+  role?: string;
+  userId?: string;
 }
 
 export interface PublicationFile {
@@ -83,6 +85,9 @@ export interface User {
   role: 'USER' | 'RESEARCHER' | 'EDITOR' | 'MODERATOR' | 'ADMIN' | 'SUPER_ADMIN';
   isVerified: boolean;
   profile?: UserProfile;
+  wallet?: Wallet;
+  bookmarkedPublicationIds?: string[];
+  followingIds?: string[];
 }
 
 export interface EditorialCategory {
