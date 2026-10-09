@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-800 antialiased selection:bg-teal-500 selection:text-white;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply tracking-tight text-slate-900;
+  }
+}
+
+/* Academic reading typography */
+.prose-academic p {
+  @apply text-slate-700 leading-relaxed text-base mb-4 font-serif;
+}
+
+.prose-academic h2 {
+  @apply text-2xl font-sans font-bold text-slate-900 mt-8 mb-4 border-b border-slate-200 pb-2;
+}
+
+.prose-academic h3 {
+  @apply text-xl font-sans font-semibold text-slate-900 mt-6 mb-3;
+}
