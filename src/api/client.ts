@@ -107,6 +107,20 @@ class ApiClient {
     });
   }
 
+  async requestVerification(data: {
+    academicTitle: string;
+    affiliationName: string;
+    department?: string;
+    orcidId?: string;
+    evidenceNote: string;
+    website?: string;
+  }): Promise<any> {
+    return this.request('/auth/request-verification', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   async getResearcherProfile(id: string): Promise<any> {
     return this.request(`/auth/researcher/${id}`);
   }
@@ -294,10 +308,11 @@ class ApiClient {
   }
 
   // Super Admin: User management
-  async getUsers(search?: string, role?: string): Promise<any[]> {
+  async getUsers(search?: string, role?: string, verifiedStatus?: string): Promise<any[]> {
     const q = new URLSearchParams();
     if (search) q.append('search', search);
     if (role) q.append('role', role);
+    if (verifiedStatus) q.append('verifiedStatus', verifiedStatus);
     return this.request(`/admin/super/users?${q.toString()}`);
   }
 

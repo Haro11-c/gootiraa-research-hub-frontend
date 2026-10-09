@@ -23,6 +23,8 @@ import {
   FileText,
   Briefcase,
   Coins,
+  Clock,
+  ShieldCheck,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { AdminStats, AuditLog, WithdrawalRequest } from '../types';
@@ -32,6 +34,7 @@ import { CreateBountyModal } from '../components/CreateBountyModal';
 export const AdminPage: React.FC = () => {
   const { user } = useAuth();
   const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+  const canManageUsers = isSuperAdmin || user?.role === 'ADMIN';
 
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
@@ -41,12 +44,13 @@ export const AdminPage: React.FC = () => {
   const [usersList, setUsersList] = useState<any[]>([]);
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('');
+  const [userVerificationFilter, setUserVerificationFilter] = useState<'ALL' | 'PENDING' | 'VERIFIED' | 'UNVERIFIED'>('ALL');
   const [inspectingSub, setInspectingSub] = useState<any | null>(null);
   const [createBountyModalOpen, setCreateBountyModalOpen] = useState(false);
 
   // Default active tab based on role
   const [activeTab, setActiveTab] = useState<'payouts' | 'users' | 'moderation' | 'logs' | 'providers'>(
-    isSuperAdmin ? 'payouts' : 'moderation'
+    isSuperAdmin ? 'payouts' : canManageUsers ? 'users' : 'moderation'
   );
 
   const [loading, setLoading] = useState(true);
@@ -55,7 +59,7 @@ export const AdminPage: React.FC = () => {
 
   useEffect(() => {
     loadDashboardData();
-  }, [activeTab]);
+  }, [activeTab, userVerificationFilter]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -63,18 +67,22 @@ export const AdminPage: React.FC = () => {
       const statsRes = await api.getAdminStats();
       setStats(statsRes);
 
-      if (isSuperAdmin) {
-        if (activeTab === 'payouts') {
-          const [payoutsRes, fraudRes] = await Promise.all([
-            api.getPayoutRequests(),
-            api.getFraudAlerts(),
-          ]);
-          setPayoutRequests(payoutsRes || []);
-          setFraudAlerts(fraudRes.flaggedWithdrawals || []);
-        } else if (activeTab === 'users') {
-          const usersRes = await api.getUsers(userSearch || undefined, userRoleFilter || undefined);
-          setUsersList(usersRes || []);
-        }
+      if (isSuperAdmin && activeTab === 'payouts') {
+        const [payoutsRes, fraudRes] = await Promise.all([
+          api.getPayoutRequests(),
+          api.getFraudAlerts(),
+        ]);
+        setPayoutRequests(payoutsRes || []);
+        setFraudAlerts(fraudRes.flaggedWithdrawals || []);
+      }
+
+      if (canManageUsers && activeTab === 'users') {
+        const usersRes = await api.getUsers(
+          userSearch || undefined,
+          userRoleFilter || undefined,
+          userVerificationFilter !== 'ALL' ? userVerificationFilter : undefined
+        );
+        setUsersList(usersRes || []);
       }
 
       if (activeTab === 'moderation') {
@@ -116,9 +124,8 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  // Super Admin: Update Verification (KYC)
-  const handleVerificationToggle = async (targetUserId: string, currentStatus: string) => {
-    const nextStatus = currentStatus === 'VERIFIED' ? 'UNVERIFIED' : 'VERIFIED';
+  // Admin & Super Admin: Update Verification (KYC)
+  const handleSetVerification = async (targetUserId: string, nextStatus: 'VERIFIED' | 'UNVERIFIED' | 'PENDING') => {
     try {
       await api.updateUserVerification(targetUserId, nextStatus);
       setActionSuccess(`Identity verification status updated to ${nextStatus}.`);
@@ -127,6 +134,11 @@ export const AdminPage: React.FC = () => {
     } catch (err: any) {
       alert(err.message || 'Failed to update verification.');
     }
+  };
+
+  const handleVerificationToggle = async (targetUserId: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'VERIFIED' ? 'UNVERIFIED' : 'VERIFIED';
+    await handleSetVerification(targetUserId, nextStatus);
   };
 
   // Moderator: Review Submission
@@ -249,31 +261,31 @@ export const AdminPage: React.FC = () => {
       {/* Role-Sensitive Navigation Tabs */}
       <div className="flex border-b border-slate-200 gap-4 text-xs font-bold uppercase tracking-wider overflow-x-auto">
         {isSuperAdmin && (
-          <>
-            <button
-              onClick={() => setActiveTab('payouts')}
-              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
-                activeTab === 'payouts'
-                  ? 'border-amber-600 text-amber-800'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <DollarSign className="w-4 h-4 text-amber-600" />
-              Financial Payouts & Anti-Fraud ({payoutRequests.length})
-            </button>
+          <button
+            onClick={() => setActiveTab('payouts')}
+            className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'payouts'
+                ? 'border-amber-600 text-amber-800'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <DollarSign className="w-4 h-4 text-amber-600" />
+            Financial Payouts & Anti-Fraud ({payoutRequests.length})
+          </button>
+        )}
 
-            <button
-              onClick={() => setActiveTab('users')}
-              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
-                activeTab === 'users'
-                  ? 'border-amber-600 text-amber-800'
-                  : 'border-transparent text-slate-500 hover:text-slate-800'
-              }`}
-            >
-              <Users className="w-4 h-4 text-amber-600" />
-              User & Role Governance
-            </button>
-          </>
+        {canManageUsers && (
+          <button
+            onClick={() => setActiveTab('users')}
+            className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
+              activeTab === 'users'
+                ? 'border-teal-600 text-teal-800'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <UserCheck className="w-4 h-4 text-teal-600" />
+            Scholar KYC & Role Governance
+          </button>
         )}
 
         <button
@@ -443,13 +455,19 @@ export const AdminPage: React.FC = () => {
       )}
 
       {/* ======================================================== */}
-      {/* TAB 2: SUPER ADMIN USER & ROLE MANAGEMENT               */}
+      {/* TAB 2: SCHOLAR KYC & ROLE GOVERNANCE                     */}
       {/* ======================================================== */}
-      {isSuperAdmin && activeTab === 'users' && (
+      {canManageUsers && activeTab === 'users' && (
         <div className="space-y-6">
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-              <h3 className="text-sm font-bold text-slate-900">User Governance & Privilege Hierarchy</h3>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Scholar KYC Verification & Role Hierarchy</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Review submitted researcher credentials, approve academic badges, and manage role escalation.
+                </p>
+              </div>
+
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <input
                   type="text"
@@ -467,6 +485,53 @@ export const AdminPage: React.FC = () => {
               </div>
             </div>
 
+            {/* Verification Status Filter Tabs */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
+              <span className="text-xs font-bold text-slate-500 mr-1">Filter KYC:</span>
+              <button
+                onClick={() => setUserVerificationFilter('ALL')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  userVerificationFilter === 'ALL'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                All Users ({usersList.length})
+              </button>
+              <button
+                onClick={() => setUserVerificationFilter('PENDING')}
+                className={`px-3 py-1 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                  userVerificationFilter === 'PENDING'
+                    ? 'bg-amber-600 text-white shadow-xs'
+                    : 'bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100'
+                }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>Pending Verification Requests</span>
+              </button>
+              <button
+                onClick={() => setUserVerificationFilter('VERIFIED')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+                  userVerificationFilter === 'VERIFIED'
+                    ? 'bg-emerald-600 text-white shadow-xs'
+                    : 'bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100'
+                }`}
+              >
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>Verified Scholars</span>
+              </button>
+              <button
+                onClick={() => setUserVerificationFilter('UNVERIFIED')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                  userVerificationFilter === 'UNVERIFIED'
+                    ? 'bg-slate-700 text-white'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`}
+              >
+                Unverified Users
+              </button>
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
@@ -474,57 +539,124 @@ export const AdminPage: React.FC = () => {
                     <th className="py-2.5">User & Affiliation</th>
                     <th className="py-2.5">Email</th>
                     <th className="py-2.5">Role</th>
-                    <th className="py-2.5">KYC Verified</th>
-                    <th className="py-2.5">Wallet Balance</th>
-                    <th className="py-2.5 text-right">Actions</th>
+                    <th className="py-2.5">KYC Verified Status</th>
+                    <th className="py-2.5">Wallet</th>
+                    <th className="py-2.5 text-right">Verification Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {usersList.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50/50">
-                      <td className="py-3 font-semibold text-slate-900">
-                        {u.profile?.fullName || 'User'}
-                        <span className="block text-[11px] text-slate-500 font-normal">
-                          {u.profile?.institution?.name || 'No institution'}
-                        </span>
-                      </td>
-                      <td className="py-3 font-mono text-slate-600">{u.email}</td>
-                      <td className="py-3">
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
-                          className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-semibold"
-                        >
-                          <option value="USER">USER</option>
-                          <option value="RESEARCHER">RESEARCHER</option>
-                          <option value="EDITOR">EDITOR</option>
-                          <option value="MODERATOR">MODERATOR</option>
-                          <option value="ADMIN">ADMIN</option>
-                          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
-                        </select>
-                      </td>
-                      <td className="py-3">
-                        <button
-                          onClick={() => handleVerificationToggle(u.id, u.profile?.verifiedStatus)}
-                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors ${
-                            u.profile?.verifiedStatus === 'VERIFIED'
-                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                              : 'bg-slate-100 text-slate-600 border border-slate-300 hover:bg-emerald-50'
+                  {usersList.length > 0 ? (
+                    usersList.map((u) => {
+                      const isPending = u.profile?.verifiedStatus === 'PENDING';
+                      const isVerified = u.profile?.verifiedStatus === 'VERIFIED';
+
+                      return (
+                        <tr
+                          key={u.id}
+                          className={`hover:bg-slate-50/50 transition-colors ${
+                            isPending ? 'bg-amber-50/40' : ''
                           }`}
                         >
-                          {u.profile?.verifiedStatus === 'VERIFIED' ? '✓ Verified' : 'Unverified'}
-                        </button>
-                      </td>
-                      <td className="py-3 font-mono font-bold text-slate-800">
-                        {u.wallet?.balanceCredits?.toLocaleString() || 0} RC
-                      </td>
-                      <td className="py-3 text-right">
-                        <span className="text-[11px] text-teal-700 font-semibold cursor-pointer hover:underline">
-                          Inspect &rarr;
-                        </span>
+                          <td className="py-3 font-semibold text-slate-900">
+                            <div className="flex items-center gap-1.5">
+                              <span>{u.profile?.fullName || 'User'}</span>
+                              {isVerified && (
+                                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                              )}
+                            </div>
+                            <span className="block text-[11px] text-slate-600 font-normal">
+                              {u.profile?.academicTitle ? (
+                                <strong className="text-teal-700">{u.profile.academicTitle} &bull; </strong>
+                              ) : null}
+                              {u.profile?.institution?.name || 'No institution'}
+                              {u.profile?.department ? ` (${u.profile.department})` : ''}
+                            </span>
+                            {u.profile?.orcidId && (
+                              <span className="text-[10px] text-green-700 font-mono block">
+                                ORCID: {u.profile.orcidId}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 font-mono text-slate-600">{u.email}</td>
+                          <td className="py-3">
+                            {isSuperAdmin ? (
+                              <select
+                                value={u.role}
+                                onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                                className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-semibold"
+                              >
+                                <option value="USER">USER</option>
+                                <option value="RESEARCHER">RESEARCHER</option>
+                                <option value="EDITOR">EDITOR</option>
+                                <option value="MODERATOR">MODERATOR</option>
+                                <option value="ADMIN">ADMIN</option>
+                                <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                              </select>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-800">
+                                {u.role}
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3">
+                            {isPending ? (
+                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 w-fit animate-pulse">
+                                <Clock className="w-3 h-3 text-amber-700" />
+                                ⏳ Pending KYC
+                              </span>
+                            ) : isVerified ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1 w-fit">
+                                <Check className="w-3 h-3 text-emerald-600" />
+                                Verified
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-slate-100 text-slate-600 border border-slate-300 w-fit inline-block">
+                                Unverified
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-3 font-mono font-bold text-slate-800">
+                            {u.wallet?.balanceCredits?.toLocaleString() || 0} RC
+                          </td>
+                          <td className="py-3 text-right">
+                            {isPending ? (
+                              <div className="flex items-center justify-end gap-1.5">
+                                <button
+                                  onClick={() => handleSetVerification(u.id, 'VERIFIED')}
+                                  className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
+                                  title="Approve researcher credentials and elevate role to RESEARCHER"
+                                >
+                                  <Check className="w-3.5 h-3.5" />
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() => handleSetVerification(u.id, 'UNVERIFIED')}
+                                  className="px-2 py-1 bg-rose-600 hover:bg-rose-500 text-white rounded-lg font-bold text-xs flex items-center gap-1 shadow-xs transition-all active:scale-95"
+                                  title="Reject verification request"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                  Reject
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleVerificationToggle(u.id, u.profile?.verifiedStatus)}
+                                className="text-[11px] text-teal-700 hover:text-teal-900 font-semibold hover:underline"
+                              >
+                                {isVerified ? 'Revoke Status' : 'Verify Scholar'}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="py-8 text-center text-slate-400">
+                        No scholars found matching the selected filter.
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>

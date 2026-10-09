@@ -36,9 +36,14 @@ import { useAuth } from '../context/AuthContext';
 interface ResearcherProfilePageProps {
   researcherId: string;
   onNavigate: (tab: string, param?: string) => void;
+  onOpenVerification?: () => void;
 }
 
-export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({ researcherId, onNavigate }) => {
+export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({
+  researcherId,
+  onNavigate,
+  onOpenVerification,
+}) => {
   const { user: currentUser } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -160,12 +165,17 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({ re
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900">{profile.fullName}</h1>
-                {profile.verifiedStatus === 'VERIFIED' && (
-                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 px-2 py-0.5 rounded-full">
+                {profile.verifiedStatus === 'VERIFIED' ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-300 px-2.5 py-0.5 rounded-full">
                     <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                     Verified Scholar
                   </span>
-                )}
+                ) : profile.verifiedStatus === 'PENDING' ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded-full animate-pulse">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    Verification In Review
+                  </span>
+                ) : null}
               </div>
 
               <p className="text-xs sm:text-sm font-medium text-slate-700">
@@ -235,6 +245,21 @@ export const ResearcherProfilePage: React.FC<ResearcherProfilePageProps> = ({ re
                   <User className="w-3.5 h-3.5 text-teal-600" />
                   Your Author Profile
                 </span>
+                {profile.verifiedStatus === 'UNVERIFIED' && onOpenVerification && (
+                  <button
+                    onClick={onOpenVerification}
+                    className="px-3.5 py-1.5 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-500 hover:to-emerald-500 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-1.5 transition-all active:scale-95"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-200" />
+                    <span>Request Scholar Verification</span>
+                  </button>
+                )}
+                {profile.verifiedStatus === 'PENDING' && (
+                  <span className="px-3 py-1.5 bg-amber-50 text-amber-800 text-xs font-semibold rounded-lg border border-amber-300 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    Verification Under Review
+                  </span>
+                )}
                 {wallet && (
                   <button
                     onClick={() => setWithdrawalModalOpen(true)}
