@@ -47,9 +47,9 @@ export const CollabRequestModal: React.FC<CollabRequestModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden">
-        <div className="px-6 py-4 bg-[#0B192C] text-white flex items-center justify-between">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
+      <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[92vh] flex flex-col border border-slate-200 overflow-hidden my-auto">
+        <div className="shrink-0 px-6 py-4 bg-[#0B192C] text-white flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-teal-400" />
             <h3 className="font-semibold text-base">Request Scholarly Collaboration</h3>
@@ -59,7 +59,7 @@ export const CollabRequestModal: React.FC<CollabRequestModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 p-6 space-y-4">
           <p className="text-xs text-slate-600">
             Send an official research inquiry to <span className="font-semibold text-slate-900">{receiverName}</span>.
           </p>

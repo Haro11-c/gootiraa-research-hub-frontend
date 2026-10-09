@@ -55,10 +55,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full border border-slate-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
+      <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[92vh] flex flex-col border border-slate-200 overflow-hidden my-auto">
         {/* Header */}
-        <div className="px-6 py-4 bg-[#0B192C] text-white flex items-center justify-between">
+        <div className="shrink-0 px-6 py-4 bg-[#0B192C] text-white flex items-center justify-between">
           <h3 className="font-semibold text-base">
             {isLoginTab ? 'Sign In to Gootiraa' : 'Create Scholarly Account'}
           </h3>
@@ -68,7 +68,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Tab switch */}
-        <div className="flex border-b border-slate-200">
+        <div className="shrink-0 flex border-b border-slate-200">
           <button
             onClick={() => { setIsLoginTab(true); setError(null); }}
             className={`flex-1 py-3 text-xs font-semibold uppercase tracking-wider text-center border-b-2 transition-colors ${
@@ -88,7 +88,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="overflow-y-auto flex-1 p-6 space-y-4">
           {error && (
             <div className="p-3 bg-red-50 text-red-700 text-xs rounded-lg flex items-start gap-2 border border-red-200">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
