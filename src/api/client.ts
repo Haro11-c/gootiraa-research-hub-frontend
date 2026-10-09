@@ -12,9 +12,14 @@ import {
 
 const getApiBase = () => {
   const envUrl = import.meta.env.VITE_API_BASE_URL;
-  if (!envUrl) return '/api/v1';
-  const clean = envUrl.replace(/\/$/, '');
-  return clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
+  if (envUrl) {
+    const clean = envUrl.replace(/\/$/, '');
+    return clean.endsWith('/api/v1') ? clean : `${clean}/api/v1`;
+  }
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return '/api/v1';
+  }
+  return 'https://gootiraa-research-hub-backend.onrender.com/api/v1';
 };
 
 const API_BASE = getApiBase();
