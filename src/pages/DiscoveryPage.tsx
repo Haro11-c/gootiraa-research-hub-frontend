@@ -326,17 +326,17 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
             )}
 
             {/* Footer row with stats and actions */}
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-              <div className="flex items-center gap-4">
+            <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-500">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 <span>Citations: <strong className="text-slate-800">{pub.metricsCitations}</strong></span>
                 <span>Views: <strong className="text-slate-800">{pub.metricsViews}</strong></span>
                 <span>Downloads: <strong className="text-slate-800">{pub.metricsDownloads}</strong></span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   onClick={() => setSelectedForExport(pub)}
-                  className="px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded flex items-center gap-1 font-medium"
+                  className="px-2.5 py-1 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded flex items-center gap-1 font-medium text-xs"
                 >
                   <Share2 className="w-3.5 h-3.5" />
                   <span>Cite</span>
@@ -344,7 +344,7 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
 
                 <button
                   onClick={() => toggleBookmark(pub.id)}
-                  className={`px-2.5 py-1 rounded flex items-center gap-1 font-medium transition-colors ${
+                  className={`px-2.5 py-1 rounded flex items-center gap-1 font-medium text-xs transition-colors ${
                     bookmarkedIds.has(pub.id)
                       ? 'bg-teal-50 text-teal-700 border border-teal-200'
                       : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900'
@@ -356,7 +356,7 @@ export const DiscoveryPage: React.FC<DiscoveryPageProps> = ({ initialQuery = '',
 
                 <button
                   onClick={() => onNavigate('publication', pub.id)}
-                  className="px-3 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded font-medium transition-colors"
+                  className="px-3 py-1 bg-teal-600 hover:bg-teal-500 text-white rounded font-medium text-xs transition-colors"
                 >
                   View Details
                 </button>

@@ -6,7 +6,6 @@ import {
   LogOut,
   Shield,
   Bookmark,
-  Menu,
   Globe,
   Coins,
   ChevronDown,
@@ -14,11 +13,14 @@ import {
   ArrowRight,
   ShieldCheck,
   Clock,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
   currentTab: string;
+  sidebarOpen: boolean;
   onNavigate: (tab: string, param?: string) => void;
   onOpenAuth: () => void;
   onToggleSidebar: () => void;
@@ -26,6 +28,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({
   currentTab,
+  sidebarOpen,
   onNavigate,
   onOpenAuth,
   onToggleSidebar,
@@ -87,22 +90,26 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <header className="sticky top-0 z-40 bg-[#0B192C]/95 backdrop-blur-md border-b border-slate-700/60 shadow-lg shadow-black/15 transition-all">
-      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-14 sm:h-16 gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+        <div className="flex items-center justify-between h-14 sm:h-16 gap-1.5 sm:gap-3">
           
-          {/* 1. Sidebar Toggle & Brand Identity */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* 1. Sidebar Toggle Button & Brand Identity (ChatGPT style) */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             <button
               onClick={onToggleSidebar}
-              className="p-1.5 sm:p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-700/60 transition-colors shadow-xs group"
-              title="Toggle Navigation Sidebar"
-              aria-label="Toggle Navigation Sidebar"
+              className="p-1.5 sm:p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800/80 border border-slate-700/60 transition-colors shadow-xs group shrink-0"
+              title={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
+              aria-label={sidebarOpen ? 'Close sidebar' : 'Open sidebar'}
             >
-              <Menu className="w-5 h-5 text-teal-400 group-hover:scale-110 transition-transform" />
+              {sidebarOpen ? (
+                <PanelLeftClose className="w-5 h-5 text-teal-400 group-hover:scale-105 transition-transform" />
+              ) : (
+                <PanelLeftOpen className="w-5 h-5 text-teal-400 group-hover:scale-105 transition-transform" />
+              )}
             </button>
 
             <div
-              className="flex items-center gap-2 cursor-pointer select-none group"
+              className="flex items-center gap-2 cursor-pointer select-none group shrink-0"
               onClick={() => onNavigate('home')}
               title="Gootiraa Research Hub — Home"
             >
@@ -111,44 +118,44 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
               <div className="flex flex-col">
                 <div className="flex items-center gap-1.5 leading-none">
-                  <span className="text-base sm:text-xl font-black tracking-tight text-white group-hover:text-teal-200 transition-colors">
+                  <span className="text-base sm:text-lg font-black tracking-tight text-white group-hover:text-teal-200 transition-colors">
                     GOOTIRAA
                   </span>
-                  <span className="text-[9px] sm:text-[10px] uppercase px-1.5 py-0.5 rounded-md bg-teal-500/20 text-teal-300 border border-teal-500/30 font-bold tracking-wider">
+                  <span className="text-[9px] uppercase px-1.5 py-0.5 rounded-md bg-teal-500/20 text-teal-300 border border-teal-500/30 font-bold tracking-wider">
                     Hub
                   </span>
                 </div>
-                <p className="text-[10px] text-slate-400 tracking-normal font-sans hidden md:block leading-tight mt-0.5">
+                <p className="text-[10px] text-slate-400 tracking-normal font-sans hidden xl:block leading-tight mt-0.5">
                   Scholarly Repository & Open Science
                 </p>
               </div>
             </div>
           </div>
 
-          {/* 2. Global Unified Search Bar (Spacious Center) */}
+          {/* 2. Global Unified Search Bar (Spacious Center with min-w-0 for mobile safety) */}
           <form
             onSubmit={handleSearchSubmit}
-            className={`flex items-center flex-1 max-w-sm md:max-w-md lg:max-w-xl mx-1 sm:mx-3 transition-all duration-200 ${
+            className={`flex items-center flex-1 min-w-0 max-w-sm md:max-w-md lg:max-w-xl mx-1 sm:mx-3 transition-all duration-200 ${
               searchFocused ? 'max-w-md md:max-w-lg lg:max-w-2xl' : ''
             }`}
           >
             <div className="relative w-full group">
               <Search
-                className={`w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors ${
+                className={`w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 transition-colors ${
                   searchFocused ? 'text-teal-400' : 'text-slate-400 group-hover:text-slate-300'
                 }`}
               />
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder="Search papers, DOIs, scholars, topics..."
+                placeholder="Search papers, DOIs, scholars..."
                 value={searchQuery}
                 onFocus={() => setSearchFocused(true)}
                 onBlur={() => setSearchFocused(false)}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#132A45]/90 hover:bg-[#183556] focus:bg-[#132A45] text-white placeholder-slate-400 text-xs sm:text-sm rounded-xl pl-9 pr-12 sm:pr-14 py-2 border border-slate-700/80 focus:border-teal-500/80 focus:outline-none focus:ring-2 focus:ring-teal-500/20 shadow-inner transition-all"
+                className="w-full bg-[#132A45]/90 hover:bg-[#183556] focus:bg-[#132A45] text-white placeholder-slate-400 text-xs sm:text-sm rounded-xl pl-8 sm:pl-9 pr-10 sm:pr-14 py-2 border border-slate-700/80 focus:border-teal-500/80 focus:outline-none focus:ring-2 focus:ring-teal-500/20 shadow-inner transition-all truncate"
               />
-              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:flex items-center gap-1 pointer-events-none">
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 hidden md:flex items-center gap-1 pointer-events-none">
                 <kbd className="text-[10px] font-mono text-slate-400 bg-slate-800/80 border border-slate-700 px-1.5 py-0.5 rounded shadow-xs">
                   Ctrl K
                 </kbd>
@@ -157,7 +164,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </form>
 
           {/* 3. Right Utility Section */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             
             {/* Language Switcher Pill */}
             <div className="relative hidden md:block">
@@ -177,10 +184,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             {isAuthenticated && (
               <button
                 onClick={() => onNavigate('profile', user?.id)}
-                className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 sm:px-2.5 py-1.5 rounded-xl flex items-center gap-1 sm:gap-1.5 text-xs font-bold transition-all shadow-xs cursor-pointer group shrink-0"
+                className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl flex items-center gap-1 text-xs font-bold transition-all shadow-xs cursor-pointer group shrink-0"
                 title="Your Research Impact Credits (RC) balance. Click to view wallet & patronage."
               >
-                <Coins className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform" />
+                <Coins className="w-3.5 h-3.5 text-amber-400 group-hover:rotate-12 transition-transform shrink-0" />
                 <span className="font-mono text-[11px] sm:text-xs">{walletBalance}</span>
                 <span className="text-[10px] text-amber-400/80 hidden sm:inline">RC</span>
               </button>
@@ -189,7 +196,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             {/* Share Research Primary CTA */}
             <button
               onClick={() => onNavigate('upload')}
-              className="hidden sm:flex bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white text-xs font-bold px-3 sm:px-4 py-2 rounded-xl shadow-md shadow-teal-900/30 items-center gap-1.5 transition-all active:scale-95 shrink-0"
+              className="hidden sm:flex bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white text-xs font-bold px-3 sm:px-3.5 py-2 rounded-xl shadow-md shadow-teal-900/30 items-center gap-1.5 transition-all active:scale-95 shrink-0"
               title="Publish or archive your scholarly work"
             >
               <Upload className="w-3.5 h-3.5 shrink-0" />
@@ -201,12 +208,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-1.5 sm:gap-2 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 px-2 sm:px-2.5 py-1.5 rounded-xl transition-all shadow-xs"
+                  className="flex items-center gap-1 sm:gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 px-2 sm:px-2.5 py-1.5 rounded-xl transition-all shadow-xs"
                 >
                   <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-teal-600 to-emerald-500 flex items-center justify-center text-xs font-black text-white shadow-xs shrink-0">
                     {userInitial}
                   </div>
-                  <span className="hidden md:inline font-semibold text-xs text-slate-200 truncate max-w-[85px]">
+                  <span className="hidden lg:inline font-semibold text-xs text-slate-200 truncate max-w-[80px]">
                     {userFirstName}
                   </span>
                   {verifiedStatus === 'VERIFIED' && (
@@ -327,7 +334,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="text-xs font-semibold text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-2.5 sm:px-3.5 py-1.5 sm:py-2 rounded-xl border border-slate-700 transition-colors shadow-xs shrink-0"
+                className="text-xs font-semibold text-slate-200 hover:text-white bg-slate-800/80 hover:bg-slate-700/80 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl border border-slate-700 transition-colors shadow-xs shrink-0"
               >
                 Sign In
               </button>

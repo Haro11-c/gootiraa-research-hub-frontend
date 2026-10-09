@@ -12,12 +12,10 @@ import {
   Zap,
   Upload,
   Layers,
-  X,
-  ExternalLink,
   ChevronRight,
-  GraduationCap,
   Building2,
   LogIn,
+  PanelLeftClose,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -68,32 +66,33 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop Overlay (only on mobile viewports < lg) */}
       {isOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden transition-opacity duration-300"
           onClick={onClose}
           aria-hidden="true"
         />
       )}
 
-      {/* Sidebar Panel */}
+      {/* Sidebar Panel — ChatGPT style docked on desktop, slide drawer on mobile */}
       <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-72 sm:w-80 bg-[#0B192C] text-slate-200 border-r border-[#1E3E62] shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 bottom-0 left-0 z-50 lg:z-30 w-72 sm:w-80 lg:w-72 bg-[#0B192C] text-slate-200 border-r border-[#1E3E62] shadow-2xl lg:shadow-md flex flex-col transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        {/* Sidebar Header */}
-        <div className="h-16 px-5 border-b border-[#1E3E62] flex items-center justify-between shrink-0 bg-[#0B192C]/90">
+        {/* Sidebar Header (ChatGPT style with Close sidebar toggle) */}
+        <div className="h-14 sm:h-16 px-4 border-b border-[#1E3E62] flex items-center justify-between shrink-0 bg-[#0B192C]/95">
           <div
             className="flex items-center gap-2.5 cursor-pointer group"
             onClick={() => handleNav('home')}
+            title="Gootiraa Research Hub — Home"
           >
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-teal-900/40 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-teal-600 to-emerald-400 flex items-center justify-center text-white shadow-md shadow-teal-900/40 group-hover:scale-105 transition-transform shrink-0">
               <Layers className="w-4 h-4 text-white" />
             </div>
             <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 leading-none">
                 <span className="text-base font-black tracking-tight text-white group-hover:text-teal-200 transition-colors">
                   GOOTIRAA
                 </span>
@@ -101,18 +100,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   Hub
                 </span>
               </div>
-              <span className="text-[9px] text-slate-400 font-sans">
+              <span className="text-[9px] text-slate-400 font-sans mt-0.5">
                 Scholarly Open Science
               </span>
             </div>
           </div>
 
+          {/* ChatGPT style Close Sidebar button */}
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            title="Close Sidebar"
+            className="p-1.5 sm:p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors group shrink-0"
+            title="Close sidebar"
+            aria-label="Close sidebar"
           >
-            <X className="w-5 h-5" />
+            <PanelLeftClose className="w-5 h-5 text-slate-300 group-hover:text-white transition-colors" />
           </button>
         </div>
 
@@ -134,10 +135,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }`}
             >
               <span className="flex items-center gap-2.5">
-                <Compass className="w-4 h-4 text-teal-400" />
+                <Compass className="w-4 h-4 text-teal-400 shrink-0" />
                 <span>Discovery Hub</span>
               </span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             </button>
 
             <button
@@ -149,10 +150,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }`}
             >
               <span className="flex items-center gap-2.5">
-                <Newspaper className="w-4 h-4 text-teal-400" />
+                <Newspaper className="w-4 h-4 text-teal-400 shrink-0" />
                 <span>Editorial & Science News</span>
               </span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             </button>
 
             <button
@@ -164,10 +165,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }`}
             >
               <span className="flex items-center gap-2.5">
-                <Sparkles className="w-4 h-4 text-teal-400" />
+                <Sparkles className="w-4 h-4 text-teal-400 shrink-0" />
                 <span>AI Research Assistant</span>
               </span>
-              <span className="text-[9px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded font-mono font-bold">
+              <span className="text-[9px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded font-mono font-bold shrink-0">
                 GPT
               </span>
             </button>
@@ -181,10 +182,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               }`}
             >
               <span className="flex items-center gap-2.5">
-                <Shield className="w-4 h-4 text-teal-400" />
+                <Shield className="w-4 h-4 text-teal-400 shrink-0" />
                 <span>Integrity & Ethics</span>
               </span>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+              <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
             </button>
           </div>
 
@@ -198,14 +199,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-1.5">
                 <button
                   onClick={() => handleNav('profile', user.id)}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     currentTab === 'profile'
                       ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
                   }`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <UserIcon className="w-4 h-4 text-teal-400" />
+                    <UserIcon className="w-4 h-4 text-teal-400 shrink-0" />
                     <span>My Scholar Profile</span>
                   </span>
                   <span className="text-[10px] text-slate-400 font-normal truncate max-w-[80px]">
@@ -215,28 +216,28 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
                 <button
                   onClick={() => handleNav('library')}
-                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                     currentTab === 'library'
                       ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
                       : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
                   }`}
                 >
                   <span className="flex items-center gap-2.5">
-                    <Bookmark className="w-4 h-4 text-teal-400" />
+                    <Bookmark className="w-4 h-4 text-teal-400 shrink-0" />
                     <span>Saved Research Library</span>
                   </span>
-                  <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-500 shrink-0" />
                 </button>
 
                 <button
                   onClick={() => handleNav('profile', user.id)}
-                  className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/70 transition-all"
+                  className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/70 transition-all"
                 >
                   <span className="flex items-center gap-2.5">
-                    <Coins className="w-4 h-4 text-amber-400" />
+                    <Coins className="w-4 h-4 text-amber-400 shrink-0" />
                     <span>Impact Wallet</span>
                   </span>
-                  <span className="font-mono text-[11px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 font-bold">
+                  <span className="font-mono text-[11px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full border border-amber-500/30 font-bold shrink-0">
                     {walletBalance} RC
                   </span>
                 </button>
@@ -280,7 +281,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             Get Verified Scholar Badge
                           </p>
                           <p className="text-[10px] text-slate-300 leading-tight mt-0.5">
-                            Submit your academic credentials to unlock reviewer privileges and research grants.
+                            Submit academic credentials for reviewer privileges and grant access.
                           </p>
                         </div>
                       </div>
@@ -289,9 +290,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           onOpenVerification();
                           if (window.innerWidth < 1024) onClose();
                         }}
-                        className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold text-[11px] py-1.5 px-3 rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                        className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white font-bold text-[11px] py-1.5 px-3 rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-all active:scale-95"
                       >
-                        <Zap className="w-3.5 h-3.5 text-amber-300" />
+                        <Zap className="w-3.5 h-3.5 text-amber-300 shrink-0" />
                         <span>Request Scholar Verification</span>
                       </button>
                     </div>
@@ -335,10 +336,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 }`}
               >
                 <span className="flex items-center gap-2.5">
-                  <Shield className="w-4 h-4 text-amber-400" />
+                  <Shield className="w-4 h-4 text-amber-400 shrink-0" />
                   <span>Administrative Console</span>
                 </span>
-                <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono uppercase">
+                <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono uppercase shrink-0">
                   {user?.role === 'SUPER_ADMIN' ? 'Super Admin' : user?.role}
                 </span>
               </button>
@@ -366,7 +367,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Action Button & Footer */}
-        <div className="p-3.5 border-t border-[#1E3E62] bg-[#0B192C]/90 space-y-2.5 shrink-0">
+        <div className="p-3.5 border-t border-[#1E3E62] bg-[#0B192C]/95 space-y-2.5 shrink-0">
           <button
             onClick={() => handleNav('upload')}
             className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-400 hover:to-teal-500 text-white text-xs font-bold py-2.5 px-4 rounded-xl shadow-md shadow-teal-900/30 flex items-center justify-center gap-2 transition-all active:scale-98"
