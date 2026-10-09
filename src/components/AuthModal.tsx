@@ -49,20 +49,15 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
-  const fillQuickCredentials = (userEmail: string) => {
-    setEmail(userEmail);
-    setPassword('Gootiraa2026Secure!');
-  };
-
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
       <div className="relative bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[92vh] flex flex-col border border-slate-200 overflow-hidden my-auto">
         {/* Header */}
         <div className="shrink-0 px-6 py-4 bg-[#0B192C] text-white flex items-center justify-between">
-          <h3 className="font-semibold text-base">
+          <h3 className="font-bold text-base text-white">
             {isLoginTab ? 'Sign In to Gootiraa' : 'Create Scholarly Account'}
           </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded">
+          <button onClick={onClose} className="text-slate-400 hover:text-white p-1 rounded transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -205,36 +200,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
           >
             {loading ? 'Processing...' : isLoginTab ? 'Sign In to Account' : 'Complete Registration'}
           </button>
-
-          {/* Quick Demo Credentials helper */}
-          {isLoginTab && (
-            <div className="pt-3 border-t border-slate-100">
-              <p className="text-[11px] font-medium text-slate-500 mb-2">Quick Sign-In Demo Accounts:</p>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => fillQuickCredentials('almaz.bekele@aau.edu.et')}
-                  className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded"
-                >
-                  Dr. Almaz (AAU)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillQuickCredentials('tadesse.worku@eaii.gov.et')}
-                  className="text-[11px] bg-slate-100 hover:bg-slate-200 text-slate-700 px-2 py-1 rounded"
-                >
-                  Dr. Tadesse (EAII)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => fillQuickCredentials('admin@gootiraa.org')}
-                  className="text-[11px] bg-amber-50 hover:bg-amber-100 text-amber-800 px-2 py-1 rounded border border-amber-200"
-                >
-                  Admin
-                </button>
-              </div>
-            </div>
-          )}
         </form>
       </div>
     </div>
