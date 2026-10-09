@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Globe,
+  Coins,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -185,7 +186,18 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
                       Saved Library
                     </button>
 
-                    {(user.role === 'ADMIN' || user.role === 'MODERATOR' || user.role === 'EDITOR') && (
+                    <button
+                      onClick={() => {
+                        setUserDropdownOpen(false);
+                        onNavigate('profile', user.id);
+                      }}
+                      className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700"
+                    >
+                      <Coins className="w-4 h-4 text-amber-500" />
+                      Impact Wallet & Earnings
+                    </button>
+
+                    {(user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' || user.role === 'MODERATOR' || user.role === 'EDITOR') && (
                       <button
                         onClick={() => {
                           setUserDropdownOpen(false);
@@ -194,7 +206,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentTab, onNavigate, onOpenAu
                         className="w-full text-left px-4 py-2 text-sm hover:bg-slate-50 flex items-center gap-2 text-slate-700 border-t border-slate-100"
                       >
                         <Shield className="w-4 h-4 text-amber-600" />
-                        Admin & Moderation
+                        {user.role === 'SUPER_ADMIN' ? 'Super Admin Governance' : 'Admin & Moderation'}
                       </button>
                     )}
 

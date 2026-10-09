@@ -17,10 +17,12 @@ import {
   Eye,
   ShieldCheck,
   ChevronRight,
+  Coins,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { Publication, AISummaryResult, AIAnswerResult } from '../types';
 import { CitationExportModal } from '../components/CitationExportModal';
+import { TipScholarModal } from '../components/TipScholarModal';
 import { useAuth } from '../context/AuthContext';
 
 interface PublicationDetailPageProps {
@@ -35,6 +37,7 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [tipModalOpen, setTipModalOpen] = useState(false);
 
   // AI Assistant Tab state
   const [aiSummary, setAiSummary] = useState<AISummaryResult | null>(null);
@@ -178,6 +181,16 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
           </div>
 
           <div className="flex items-center gap-2">
+            {publication.submitter?.id && (
+              <button
+                onClick={() => setTipModalOpen(true)}
+                className="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+              >
+                <Coins className="w-3.5 h-3.5" />
+                <span>Tip Author</span>
+              </button>
+            )}
+
             <button
               onClick={() => setExportModalOpen(true)}
               className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors"
@@ -584,6 +597,29 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
             </div>
           )}
 
+          {/* Author Research Patronage Card */}
+          {publication.submitter?.id && (
+            <div className="bg-gradient-to-br from-amber-50/70 to-orange-50/40 rounded-xl border border-amber-200 p-5 shadow-sm space-y-3">
+              <div className="flex items-center gap-2">
+                <Coins className="w-4 h-4 text-amber-600" />
+                <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                  Support Author's Research
+                </h3>
+              </div>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                Direct reader patronage in Research Impact Credits (RC) directly supports{' '}
+                <strong>{publication.submitter.profile?.fullName || 'the contributing author'}</strong> to finance open research, datasets, and laboratory supplies.
+              </p>
+              <button
+                onClick={() => setTipModalOpen(true)}
+                className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 text-xs font-bold rounded-lg shadow-sm flex items-center justify-center gap-1.5 transition-all"
+              >
+                <Coins className="w-4 h-4" />
+                <span>Tip Author ({publication.submitter.profile?.fullName?.split(' ')[0] || 'Scholar'})</span>
+              </button>
+            </div>
+          )}
+
           {/* Related Publications */}
           {publication.related && publication.related.length > 0 && (
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-3">
@@ -619,6 +655,18 @@ export const PublicationDetailPage: React.FC<PublicationDetailPageProps> = ({ pu
           publication={publication}
           isOpen={exportModalOpen}
           onClose={() => setExportModalOpen(false)}
+        />
+      )}
+
+      {/* Tip Scholar Modal */}
+      {tipModalOpen && publication.submitter?.id && (
+        <TipScholarModal
+          receiverUserId={publication.submitter.id}
+          receiverName={publication.submitter.profile?.fullName || 'Contributing Scholar'}
+          publicationId={publication.id}
+          publicationTitle={publication.title}
+          isOpen={tipModalOpen}
+          onClose={() => setTipModalOpen(false)}
         />
       )}
     </div>

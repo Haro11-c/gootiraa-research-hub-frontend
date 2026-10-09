@@ -45,6 +45,13 @@ export interface Publication {
   files?: PublicationFile[];
   related?: Partial<Publication>[];
   questions?: Question[];
+  submitterId?: string;
+  submitter?: {
+    id: string;
+    email: string;
+    role: string;
+    profile?: UserProfile;
+  };
 }
 
 export interface UserProfile {
@@ -72,7 +79,7 @@ export interface UserProfile {
 export interface User {
   id: string;
   email: string;
-  role: 'USER' | 'RESEARCHER' | 'EDITOR' | 'MODERATOR' | 'ADMIN';
+  role: 'USER' | 'RESEARCHER' | 'EDITOR' | 'MODERATOR' | 'ADMIN' | 'SUPER_ADMIN';
   isVerified: boolean;
   profile?: UserProfile;
 }
@@ -197,6 +204,10 @@ export interface AdminStats {
   publications: { published: number; pendingModeration: number };
   editorial: { articles: number };
   moderation: { openReports: number };
+  finance?: {
+    pendingPayoutsCount: number;
+    totalCreditsInWallets: number;
+  };
   providers: {
     openAlex: { status: string; lastChecked: string };
     crossref: { status: string; lastChecked: string };
@@ -218,3 +229,66 @@ export interface AuditLog {
     role: string;
   };
 }
+
+export interface WalletTransaction {
+  id: string;
+  amountCredits: number;
+  type: string;
+  status: string;
+  description: string;
+  referenceId?: string;
+  senderName?: string;
+  createdAt: string;
+}
+
+export interface Wallet {
+  id: string;
+  userId: string;
+  balanceCredits: number;
+  totalEarnedCredits: number;
+  totalWithdrawnCredits: number;
+  payoutChannel?: string;
+  payoutAccountNumber?: string;
+  payoutAccountName?: string;
+  transactions?: WalletTransaction[];
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  userId: string;
+  amountCredits: number;
+  amountFiat: number;
+  currency: string;
+  channel: string;
+  accountNumber: string;
+  accountName: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+  fraudRiskScore: number;
+  fraudFlags?: string[];
+  createdAt: string;
+  user?: {
+    id: string;
+    email: string;
+    role: string;
+    createdAt: string;
+    profile?: {
+      fullName: string;
+      academicTitle?: string;
+      verifiedStatus?: string;
+      institution?: { name: string };
+    };
+  };
+}
+
+export interface ResearchBounty {
+  id: string;
+  title: string;
+  description: string;
+  sponsorName: string;
+  sponsorLogoUrl?: string;
+  rewardCredits: number;
+  rewardFiat: number;
+  currency: string;
+  status: string;
+}
+

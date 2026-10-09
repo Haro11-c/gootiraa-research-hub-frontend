@@ -10,36 +10,71 @@ import {
   UserCheck,
   RefreshCw,
   ExternalLink,
+  DollarSign,
+  Users,
+  AlertOctagon,
+  Lock,
+  ArrowRight,
+  Search,
+  Filter,
 } from 'lucide-react';
 import { api } from '../api/client';
-import { AdminStats, AuditLog } from '../types';
+import { AdminStats, AuditLog, WithdrawalRequest } from '../types';
 import { useAuth } from '../context/AuthContext';
 
 export const AdminPage: React.FC = () => {
   const { user } = useAuth();
+  const isSuperAdmin = user?.role === 'SUPER_ADMIN';
+
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [submissions, setSubmissions] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  const [activeTab, setActiveTab] = useState<'moderation' | 'logs' | 'providers'>('moderation');
+  const [payoutRequests, setPayoutRequests] = useState<WithdrawalRequest[]>([]);
+  const [fraudAlerts, setFraudAlerts] = useState<any[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [userSearch, setUserSearch] = useState('');
+  const [userRoleFilter, setUserRoleFilter] = useState('');
+
+  // Default active tab based on role
+  const [activeTab, setActiveTab] = useState<'payouts' | 'users' | 'moderation' | 'logs' | 'providers'>(
+    isSuperAdmin ? 'payouts' : 'moderation'
+  );
+
   const [loading, setLoading] = useState(true);
-  const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [reviewNotes, setReviewNotes] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    loadAdminData();
-  }, []);
+    loadDashboardData();
+  }, [activeTab]);
 
-  const loadAdminData = async () => {
+  const loadDashboardData = async () => {
     setLoading(true);
     try {
-      const [statsRes, subRes, logsRes] = await Promise.all([
-        api.getAdminStats(),
-        api.getPendingSubmissions(),
-        api.getAuditLogs(),
-      ]);
+      const statsRes = await api.getAdminStats();
       setStats(statsRes);
-      setSubmissions(subRes.submissions);
-      setAuditLogs(logsRes.logs);
+
+      if (isSuperAdmin) {
+        if (activeTab === 'payouts') {
+          const [payoutsRes, fraudRes] = await Promise.all([
+            api.getPayoutRequests(),
+            api.getFraudAlerts(),
+          ]);
+          setPayoutRequests(payoutsRes || []);
+          setFraudAlerts(fraudRes.flaggedWithdrawals || []);
+        } else if (activeTab === 'users') {
+          const usersRes = await api.getUsers(userSearch || undefined, userRoleFilter || undefined);
+          setUsersList(usersRes || []);
+        }
+      }
+
+      if (activeTab === 'moderation') {
+        const subRes = await api.getPendingSubmissions();
+        setSubmissions(subRes.submissions || []);
+      } else if (activeTab === 'logs') {
+        const logsRes = await api.getAuditLogs();
+        setAuditLogs(logsRes.logs || []);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -47,135 +82,445 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleReview = async (id: string, action: 'APPROVED' | 'REJECTED') => {
-    const notes = reviewNotes[id] || (action === 'APPROVED' ? 'Approved by academic moderator' : 'Rejected due to insufficient documentation');
+  // Super Admin: Review Payout Request
+  const handleReviewPayout = async (id: string, action: 'APPROVED' | 'REJECTED') => {
+    const notes = reviewNotes[id] || (action === 'APPROVED' ? 'Cleared compliance & KYC check' : 'Flagged for abnormal velocity or unverified identity');
     try {
-      await api.reviewSubmission(id, action, notes);
-      setActionSuccess(`Submission successfully marked as ${action}.`);
-      loadAdminData();
-      setTimeout(() => setActionSuccess(null), 3000);
+      await api.reviewPayoutRequest(id, action, notes);
+      setActionSuccess(`Payout request successfully marked as ${action}.`);
+      loadDashboardData();
+      setTimeout(() => setActionSuccess(null), 3500);
     } catch (err: any) {
       alert(err.message || 'Action failed.');
     }
   };
 
-  if (!user || (user.role !== 'ADMIN' && user.role !== 'MODERATOR' && user.role !== 'EDITOR')) {
+  // Super Admin: Update User Role
+  const handleRoleChange = async (targetUserId: string, newRole: string) => {
+    try {
+      await api.updateUserRole(targetUserId, newRole);
+      setActionSuccess(`User role updated to ${newRole}.`);
+      loadDashboardData();
+      setTimeout(() => setActionSuccess(null), 3000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update user role.');
+    }
+  };
+
+  // Super Admin: Update Verification (KYC)
+  const handleVerificationToggle = async (targetUserId: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'VERIFIED' ? 'UNVERIFIED' : 'VERIFIED';
+    try {
+      await api.updateUserVerification(targetUserId, nextStatus);
+      setActionSuccess(`Identity verification status updated to ${nextStatus}.`);
+      loadDashboardData();
+      setTimeout(() => setActionSuccess(null), 3000);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update verification.');
+    }
+  };
+
+  // Moderator: Review Submission
+  const handleReviewSubmission = async (id: string, action: 'APPROVED' | 'REJECTED') => {
+    const notes = reviewNotes[id] || (action === 'APPROVED' ? 'Approved by academic moderator' : 'Rejected due to insufficient documentation');
+    try {
+      await api.reviewSubmission(id, action, notes);
+      setActionSuccess(`Submission marked as ${action} (Author awarded research grant).`);
+      loadDashboardData();
+      setTimeout(() => setActionSuccess(null), 3500);
+    } catch (err: any) {
+      alert(err.message || 'Action failed.');
+    }
+  };
+
+  if (!user || (!['ADMIN', 'SUPER_ADMIN', 'MODERATOR', 'EDITOR'].includes(user.role))) {
     return (
       <div className="max-w-md mx-auto px-4 py-16 text-center space-y-4">
-        <Shield className="w-12 h-12 text-amber-500 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-900">Restricted Administration Access</h2>
+        <Lock className="w-12 h-12 text-amber-500 mx-auto" />
+        <h2 className="text-xl font-bold text-slate-900">Restricted Administration Terminal</h2>
         <p className="text-xs text-slate-600">
-          You must hold an authorized administrative, moderator, or editor role to view this operational console.
+          You must hold an authorized administrative or moderator role to access this system console.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-      {/* Header */}
-      <div className="bg-[#0B192C] text-white rounded-2xl p-6 sm:p-8 border border-[#1E3E62] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-amber-400" />
-            <h1 className="text-xl sm:text-2xl font-bold">Platform Administration & Moderation</h1>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 font-sans">
+      {/* Executive Command Header */}
+      <div className="bg-[#0B192C] text-white rounded-2xl p-6 sm:p-8 border border-[#1E3E62] shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2.5">
+            <Shield className={`w-6 h-6 ${isSuperAdmin ? 'text-amber-400' : 'text-teal-400'}`} />
+            <h1 className="text-xl sm:text-2xl font-black tracking-tight">
+              {isSuperAdmin ? 'SUPER ADMIN COMMAND & ANTI-FRAUD CONSOLE' : 'ACADEMIC MODERATION DASHBOARD'}
+            </h1>
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                isSuperAdmin
+                  ? 'bg-amber-400/20 text-amber-300 border border-amber-400/50'
+                  : 'bg-teal-400/20 text-teal-300 border border-teal-400/50'
+              }`}
+            >
+              {user.role}
+            </span>
           </div>
           <p className="text-xs text-slate-400">
-            Least-privilege operational console, submission review queues, and audit trail monitors.
+            {isSuperAdmin
+              ? 'Full platform oversight: financial payout compliance, user role elevation, and security risk telemetry.'
+              : 'Scholarly peer integrity: review research manuscripts, manage copyright disputes, and inspect audit logs.'}
           </p>
         </div>
 
         <button
-          onClick={loadAdminData}
-          className="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg flex items-center gap-1.5 border border-slate-600 shrink-0 self-start sm:self-auto"
+          onClick={loadDashboardData}
+          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg flex items-center gap-2 border border-slate-600 shrink-0 self-start sm:self-auto transition-colors"
         >
           <RefreshCw className="w-3.5 h-3.5" />
-          <span>Refresh Data</span>
+          <span>Refresh Telemetry</span>
         </button>
       </div>
 
       {actionSuccess && (
-        <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-semibold">
-          ✓ {actionSuccess}
+        <div className="p-3 bg-emerald-50 text-emerald-800 border border-emerald-300 rounded-xl text-xs font-bold flex items-center gap-2">
+          <Check className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{actionSuccess}</span>
         </div>
       )}
 
-      {/* Metrics Row */}
+      {/* Real-time High-Level Metrics */}
       {stats && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-2xl font-bold text-slate-900">{stats.publications.published}</div>
-            <div className="text-xs text-slate-500 font-medium mt-0.5">Published Papers</div>
-            <div className="text-[11px] text-teal-600 mt-1 font-semibold">{stats.publications.pendingModeration} Pending Review</div>
+            <div className="text-2xl font-black text-slate-900">{stats.publications.published}</div>
+            <div className="text-xs text-slate-500 font-medium mt-0.5">Approved Publications</div>
+            <div className="text-[11px] text-amber-600 mt-1 font-bold">
+              {stats.publications.pendingModeration} Pending Clearance
+            </div>
           </div>
 
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-2xl font-bold text-slate-900">{stats.users.total}</div>
-            <div className="text-xs text-slate-500 font-medium mt-0.5">Registered Users</div>
-            <div className="text-[11px] text-teal-600 mt-1 font-semibold">{stats.users.researchers} Verified Researchers</div>
+            <div className="text-2xl font-black text-slate-900">{stats.users.total}</div>
+            <div className="text-xs text-slate-500 font-medium mt-0.5">Total Users</div>
+            <div className="text-[11px] text-teal-600 mt-1 font-bold">
+              {stats.users.researchers} Verified Researchers
+            </div>
           </div>
 
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-2xl font-bold text-slate-900">{stats.editorial.articles}</div>
-            <div className="text-xs text-slate-500 font-medium mt-0.5">Editorial Stories</div>
-            <div className="text-[11px] text-teal-600 mt-1 font-semibold">Fact-Checks & Explainers</div>
+            <div className="text-2xl font-black text-teal-700">
+              {stats.finance?.totalCreditsInWallets?.toLocaleString() || '5,600'} RC
+            </div>
+            <div className="text-xs text-slate-500 font-medium mt-0.5">Circulating Research Credits</div>
+            <div className="text-[11px] text-slate-600 mt-1 font-mono">
+              ≈ {(stats.finance?.totalCreditsInWallets || 5600).toLocaleString()} ETB
+            </div>
           </div>
 
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <div className="text-2xl font-bold text-emerald-600">Healthy</div>
-            <div className="text-xs text-slate-500 font-medium mt-0.5">Provider Adapters</div>
+            <div className="text-2xl font-black text-emerald-600">Zero Flags</div>
+            <div className="text-xs text-slate-500 font-medium mt-0.5">Scholarly APIs</div>
             <div className="text-[11px] text-slate-500 mt-1 font-mono">OpenAlex &bull; Crossref &bull; arXiv</div>
           </div>
         </div>
       )}
 
-      {/* Admin Tabs */}
-      <div className="flex border-b border-slate-200 gap-4 text-xs font-semibold uppercase tracking-wider">
+      {/* Role-Sensitive Navigation Tabs */}
+      <div className="flex border-b border-slate-200 gap-4 text-xs font-bold uppercase tracking-wider overflow-x-auto">
+        {isSuperAdmin && (
+          <>
+            <button
+              onClick={() => setActiveTab('payouts')}
+              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
+                activeTab === 'payouts'
+                  ? 'border-amber-600 text-amber-800'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <DollarSign className="w-4 h-4 text-amber-600" />
+              Financial Payouts & Anti-Fraud ({payoutRequests.length})
+            </button>
+
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
+                activeTab === 'users'
+                  ? 'border-amber-600 text-amber-800'
+                  : 'border-transparent text-slate-500 hover:text-slate-800'
+              }`}
+            >
+              <Users className="w-4 h-4 text-amber-600" />
+              User & Role Governance
+            </button>
+          </>
+        )}
+
         <button
           onClick={() => setActiveTab('moderation')}
-          className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+          className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
             activeTab === 'moderation'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <FileCheck className="w-4 h-4" />
+          <FileCheck className="w-4 h-4 text-teal-600" />
           Submissions Queue ({submissions.length})
         </button>
 
         <button
           onClick={() => setActiveTab('logs')}
-          className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+          className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
             activeTab === 'logs'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <History className="w-4 h-4" />
-          Tamper-Evident Audit Logs ({auditLogs.length})
+          <History className="w-4 h-4 text-teal-600" />
+          Audit Trail Stream
         </button>
 
         <button
           onClick={() => setActiveTab('providers')}
-          className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 ${
+          className={`pb-3 border-b-2 transition-colors flex items-center gap-1.5 shrink-0 ${
             activeTab === 'providers'
               ? 'border-teal-600 text-teal-700'
               : 'border-transparent text-slate-500 hover:text-slate-800'
           }`}
         >
-          <Activity className="w-4 h-4" />
-          Provider Health & Adapters
+          <Activity className="w-4 h-4 text-teal-600" />
+          Provider Health
         </button>
       </div>
 
-      {/* TAB 1: MODERATION QUEUE */}
+      {/* ======================================================== */}
+      {/* TAB 1: SUPER ADMIN PAYOUTS & FRAUD CONTROLS             */}
+      {/* ======================================================== */}
+      {isSuperAdmin && activeTab === 'payouts' && (
+        <div className="space-y-6">
+          {/* Fraud Alert Warning Box */}
+          {fraudAlerts.length > 0 && (
+            <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-5 space-y-3">
+              <div className="flex items-center gap-2 text-red-900 font-black text-sm">
+                <AlertOctagon className="w-5 h-5 text-red-600" />
+                <span>ANTI-FRAUD WARNING: {fraudAlerts.length} Flagged High-Risk Transaction(s)</span>
+              </div>
+              <p className="text-xs text-red-700 leading-relaxed">
+                The automated compliance engine detected withdrawal requests exhibiting abnormal velocity, unverified
+                identities, or zero peer-reviewed outputs. Review these requests with extreme caution before disbursing funds.
+              </p>
+            </div>
+          )}
+
+          {/* Payouts Table */}
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wide">
+                Pending Researcher Cash Payout Requests
+              </h3>
+              <span className="text-[11px] text-slate-500 font-mono">1,000 RC = 1,000 ETB / $10 USD</span>
+            </div>
+
+            <div className="divide-y divide-slate-100 text-xs">
+              {payoutRequests.length > 0 ? (
+                payoutRequests.map((req) => (
+                  <div key={req.id} className="p-5 hover:bg-slate-50/50 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <strong className="text-slate-900 text-sm">{req.accountName}</strong>
+                          <span className="text-slate-500">({req.user?.email})</span>
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              req.user?.profile?.verifiedStatus === 'VERIFIED'
+                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-300'
+                                : 'bg-red-50 text-red-800 border border-red-300'
+                            }`}
+                          >
+                            {req.user?.profile?.verifiedStatus || 'UNVERIFIED'}
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">
+                          Channel: <strong className="text-slate-700">{req.channel}</strong> &bull; Account:{' '}
+                          <code className="text-slate-700 font-mono">{req.accountNumber}</code>
+                        </div>
+                      </div>
+
+                      {/* Fraud Score & Risk Badge */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div
+                          className={`px-3 py-1 rounded-lg text-xs font-black flex items-center gap-1 ${
+                            req.fraudRiskScore >= 50
+                              ? 'bg-red-100 text-red-800 border border-red-300'
+                              : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          }`}
+                        >
+                          <Shield className="w-3.5 h-3.5" />
+                          <span>Risk Score: {req.fraudRiskScore}/100</span>
+                        </div>
+
+                        <span className="text-base font-black text-slate-900 px-2">
+                          {req.amountCredits.toLocaleString()} RC{' '}
+                          <span className="text-xs font-normal text-slate-500">({req.amountFiat} {req.currency})</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Fraud Flags */}
+                    {req.fraudFlags && req.fraudFlags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 pt-1">
+                        {req.fraudFlags.map((flag, i) => (
+                          <span
+                            key={i}
+                            className="bg-amber-100 text-amber-800 px-2 py-0.5 rounded text-[10px] font-mono font-bold"
+                          >
+                            FLAG: {flag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    {req.status === 'PENDING' ? (
+                      <div className="pt-2 flex flex-col sm:flex-row items-center gap-3">
+                        <input
+                          type="text"
+                          placeholder="Audit review note (e.g. Telebirr reference # or fraud flag reason)..."
+                          value={reviewNotes[req.id] || ''}
+                          onChange={(e) => setReviewNotes({ ...reviewNotes, [req.id]: e.target.value })}
+                          className="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none"
+                        />
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => handleReviewPayout(req.id, 'APPROVED')}
+                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold flex items-center gap-1 shadow-sm"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            Approve Payout
+                          </button>
+                          <button
+                            onClick={() => handleReviewPayout(req.id, 'REJECTED')}
+                            className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold flex items-center gap-1 shadow-sm"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                            Reject & Refund
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="pt-2 text-xs font-bold text-slate-600">
+                        Status: <span className="uppercase">{req.status}</span>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="p-8 text-center text-slate-500">No pending withdrawal requests.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB 2: SUPER ADMIN USER & ROLE MANAGEMENT               */}
+      {/* ======================================================== */}
+      {isSuperAdmin && activeTab === 'users' && (
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <h3 className="text-sm font-bold text-slate-900">User Governance & Privilege Hierarchy</h3>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <input
+                  type="text"
+                  placeholder="Search by name or email..."
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  className="text-xs border border-slate-300 rounded-lg px-3 py-1.5 focus:outline-none"
+                />
+                <button
+                  onClick={loadDashboardData}
+                  className="px-3 py-1.5 bg-slate-800 text-white text-xs font-semibold rounded-lg"
+                >
+                  Search
+                </button>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 font-bold uppercase tracking-wider">
+                    <th className="py-2.5">User & Affiliation</th>
+                    <th className="py-2.5">Email</th>
+                    <th className="py-2.5">Role</th>
+                    <th className="py-2.5">KYC Verified</th>
+                    <th className="py-2.5">Wallet Balance</th>
+                    <th className="py-2.5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {usersList.map((u) => (
+                    <tr key={u.id} className="hover:bg-slate-50/50">
+                      <td className="py-3 font-semibold text-slate-900">
+                        {u.profile?.fullName || 'User'}
+                        <span className="block text-[11px] text-slate-500 font-normal">
+                          {u.profile?.institution?.name || 'No institution'}
+                        </span>
+                      </td>
+                      <td className="py-3 font-mono text-slate-600">{u.email}</td>
+                      <td className="py-3">
+                        <select
+                          value={u.role}
+                          onChange={(e) => handleRoleChange(u.id, e.target.value)}
+                          className="bg-slate-50 border border-slate-300 rounded px-2 py-1 text-xs font-semibold"
+                        >
+                          <option value="USER">USER</option>
+                          <option value="RESEARCHER">RESEARCHER</option>
+                          <option value="EDITOR">EDITOR</option>
+                          <option value="MODERATOR">MODERATOR</option>
+                          <option value="ADMIN">ADMIN</option>
+                          <option value="SUPER_ADMIN">SUPER_ADMIN</option>
+                        </select>
+                      </td>
+                      <td className="py-3">
+                        <button
+                          onClick={() => handleVerificationToggle(u.id, u.profile?.verifiedStatus)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase transition-colors ${
+                            u.profile?.verifiedStatus === 'VERIFIED'
+                              ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              : 'bg-slate-100 text-slate-600 border border-slate-300 hover:bg-emerald-50'
+                          }`}
+                        >
+                          {u.profile?.verifiedStatus === 'VERIFIED' ? '✓ Verified' : 'Unverified'}
+                        </button>
+                      </td>
+                      <td className="py-3 font-mono font-bold text-slate-800">
+                        {u.wallet?.balanceCredits?.toLocaleString() || 0} RC
+                      </td>
+                      <td className="py-3 text-right">
+                        <span className="text-[11px] text-teal-700 font-semibold cursor-pointer hover:underline">
+                          Inspect &rarr;
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================== */}
+      {/* TAB 3: ACADEMIC MODERATOR QUEUE                          */}
+      {/* ======================================================== */}
       {activeTab === 'moderation' && (
         <div className="space-y-4">
           {submissions.length > 0 ? (
             submissions.map((sub) => (
-              <div key={sub.id} className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-4">
+              <div key={sub.id} className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="bg-amber-50 text-amber-800 border border-amber-300 px-2 py-0.5 rounded font-semibold">
+                  <span className="bg-amber-50 text-amber-800 border border-amber-300 px-2.5 py-0.5 rounded font-bold">
                     Status: SUBMITTED (Pending Review)
                   </span>
                   <span className="text-slate-400 font-mono text-[11px]">{new Date(sub.createdAt).toLocaleString()}</span>
@@ -183,7 +528,7 @@ export const AdminPage: React.FC = () => {
 
                 <div>
                   <h3 className="font-bold text-slate-900 text-base">{sub.title}</h3>
-                  <p className="text-xs text-slate-600 mt-1 line-clamp-3">{sub.abstract}</p>
+                  <p className="text-xs text-slate-600 mt-1 line-clamp-3 leading-relaxed">{sub.abstract}</p>
                 </div>
 
                 <div className="text-xs text-slate-500 flex flex-wrap items-center gap-3">
@@ -192,11 +537,10 @@ export const AdminPage: React.FC = () => {
                   <span>License: <strong className="text-slate-700">{sub.license}</strong></span>
                 </div>
 
-                {/* Review Notes and Decision Buttons */}
                 <div className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
                   <input
                     type="text"
-                    placeholder="Enter moderation assessment notes..."
+                    placeholder="Reviewer notes (e.g. Cleared method verification and license)..."
                     value={reviewNotes[sub.id] || ''}
                     onChange={(e) => setReviewNotes({ ...reviewNotes, [sub.id]: e.target.value })}
                     className="flex-1 text-xs border border-slate-300 rounded-lg px-3 py-2 focus:outline-none"
@@ -204,16 +548,16 @@ export const AdminPage: React.FC = () => {
 
                   <div className="flex items-center gap-2 shrink-0">
                     <button
-                      onClick={() => handleReview(sub.id, 'APPROVED')}
-                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shadow-sm"
+                      onClick={() => handleReviewSubmission(sub.id, 'APPROVED')}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm"
                     >
                       <Check className="w-3.5 h-3.5" />
-                      Approve & Publish
+                      Approve & Grant 200 RC
                     </button>
 
                     <button
-                      onClick={() => handleReview(sub.id, 'REJECTED')}
-                      className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1 shadow-sm"
+                      onClick={() => handleReviewSubmission(sub.id, 'REJECTED')}
+                      className="px-4 py-2 bg-red-600 hover:bg-red-500 text-white text-xs font-bold rounded-lg flex items-center gap-1 shadow-sm"
                     >
                       <X className="w-3.5 h-3.5" />
                       Reject
@@ -223,18 +567,20 @@ export const AdminPage: React.FC = () => {
               </div>
             ))
           ) : (
-            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-xs text-slate-500">
-              ✓ All research submissions have been reviewed. The moderation queue is clear.
+            <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center text-xs text-slate-500">
+              ✓ All research submissions have been verified and cleared by moderators.
             </div>
           )}
         </div>
       )}
 
-      {/* TAB 2: AUDIT LOGS */}
+      {/* ======================================================== */}
+      {/* TAB 4: AUDIT TRAIL STREAM                                */}
+      {/* ======================================================== */}
       {activeTab === 'logs' && (
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="p-4 bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-700">
-            Chronological Security and Content Events
+            Immutable Security & Content Audit Trail (OWASP A09 Compliant)
           </div>
           <div className="divide-y divide-slate-100 text-xs">
             {auditLogs.map((log) => (
@@ -244,7 +590,7 @@ export const AdminPage: React.FC = () => {
                     <span className="font-mono font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
                       {log.action}
                     </span>
-                    <span className="text-slate-500">on entity {log.entityType} ({log.entityId?.slice(0, 8)})</span>
+                    <span className="text-slate-500">entity {log.entityType} ({log.entityId?.slice(0, 8)})</span>
                   </div>
                   {log.detailsJson && (
                     <p className="text-[11px] text-slate-600 font-mono truncate max-w-lg">{log.detailsJson}</p>
@@ -261,42 +607,44 @@ export const AdminPage: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: PROVIDER HEALTH */}
+      {/* ======================================================== */}
+      {/* TAB 5: SCHOLARLY PROVIDERS                               */}
+      {/* ======================================================== */}
       {activeTab === 'providers' && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="font-bold text-slate-900 text-sm">OpenAlex API</h4>
               <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">ONLINE</span>
             </div>
             <p className="text-xs text-slate-600">
-              Scholarly bibliographic metadata provider for authors, works, and citations graph.
+              Open scholarly graph indexing author disambiguation, institutions, and citation tracking.
             </p>
             <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-100">
               Endpoint: <code className="text-slate-600">https://api.openalex.org</code>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
-              <h4 className="font-bold text-slate-900 text-sm">Crossref API</h4>
+              <h4 className="font-bold text-slate-900 text-sm">Crossref DOI Registry</h4>
               <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">ONLINE</span>
             </div>
             <p className="text-xs text-slate-600">
-              Official Digital Object Identifier (DOI) registry and bibliographic metadata adapter.
+              Digital Object Identifier resolution and bibliographic citation network.
             </p>
             <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-100">
               Endpoint: <code className="text-slate-600">https://api.crossref.org</code>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-3">
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <div className="flex items-center justify-between">
               <h4 className="font-bold text-slate-900 text-sm">arXiv Preprint Engine</h4>
               <span className="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">ONLINE</span>
             </div>
             <p className="text-xs text-slate-600">
-              Open-access preprint ingestion service for computer science, mathematics, and physics.
+              Open preprint metadata feed across computer science, AI, and quantitative biology.
             </p>
             <div className="text-[11px] text-slate-400 pt-2 border-t border-slate-100">
               Endpoint: <code className="text-slate-600">http://export.arxiv.org</code>

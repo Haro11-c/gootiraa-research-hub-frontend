@@ -221,11 +221,74 @@ class ApiClient {
     });
   }
 
-  // Admin Endpoints
+  // Wallet & Reward Endpoints
+  async getWallet(): Promise<any> {
+    return this.request('/wallet/me');
+  }
+
+  async sendTip(data: { receiverUserId: string; amountCredits: number; publicationId?: string; message?: string }): Promise<any> {
+    return this.request('/wallet/tip', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async requestWithdrawal(data: { amountCredits: number; channel: string; accountNumber: string; accountName: string; currency?: string }): Promise<any> {
+    return this.request('/wallet/withdraw', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getBounties(): Promise<any[]> {
+    return this.request('/wallet/bounties');
+  }
+
+  // Admin & Super Admin Endpoints
   async getAdminStats(): Promise<AdminStats> {
     return this.request('/admin/stats');
   }
 
+  // Super Admin: User management
+  async getUsers(search?: string, role?: string): Promise<any[]> {
+    const q = new URLSearchParams();
+    if (search) q.append('search', search);
+    if (role) q.append('role', role);
+    return this.request(`/admin/super/users?${q.toString()}`);
+  }
+
+  async updateUserRole(targetUserId: string, role: string): Promise<any> {
+    return this.request('/admin/super/users/role', {
+      method: 'POST',
+      body: JSON.stringify({ targetUserId, role }),
+    });
+  }
+
+  async updateUserVerification(targetUserId: string, verifiedStatus: string): Promise<any> {
+    return this.request('/admin/super/users/verify', {
+      method: 'POST',
+      body: JSON.stringify({ targetUserId, verifiedStatus }),
+    });
+  }
+
+  // Super Admin: Financial Payouts & Anti-Fraud
+  async getPayoutRequests(status?: string): Promise<any[]> {
+    const q = status ? `?status=${status}` : '';
+    return this.request(`/admin/super/payouts${q}`);
+  }
+
+  async reviewPayoutRequest(id: string, action: 'APPROVED' | 'REJECTED', notes: string): Promise<any> {
+    return this.request(`/admin/super/payouts/${id}/review`, {
+      method: 'POST',
+      body: JSON.stringify({ action, notes }),
+    });
+  }
+
+  async getFraudAlerts(): Promise<any> {
+    return this.request('/admin/super/fraud-alerts');
+  }
+
+  // Academic Moderator Endpoints
   async getPendingSubmissions(): Promise<{ submissions: any[]; meta: any }> {
     const res: any = await this.request('/admin/submissions');
     return { submissions: res, meta: {} };
