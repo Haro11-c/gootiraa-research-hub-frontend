@@ -179,6 +179,13 @@ class ApiClient {
     return this.request('/editorial/categories');
   }
 
+  async createArticle(data: any): Promise<EditorialArticle> {
+    return this.request('/editorial/articles', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
   // AI Assistant Endpoints
   async summarizePublication(publicationId: string): Promise<AISummaryResult> {
     return this.request('/ai/summarize', {
@@ -260,6 +267,13 @@ class ApiClient {
 
   async getBounties(): Promise<any[]> {
     return this.request('/wallet/bounties');
+  }
+
+  async createBounty(data: any): Promise<any> {
+    return this.request('/wallet/bounties', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
   }
 
   // Admin & Super Admin Endpoints

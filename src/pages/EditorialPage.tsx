@@ -10,15 +10,22 @@ import {
   CheckCircle,
   HelpCircle,
   AlertTriangle,
+  PenTool,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { EditorialArticle, EditorialCategory } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { CreateArticleModal } from '../components/CreateArticleModal';
 
 interface EditorialPageProps {
   onNavigate: (tab: string, param?: string) => void;
 }
 
 export const EditorialPage: React.FC<EditorialPageProps> = ({ onNavigate }) => {
+  const { user } = useAuth();
+  const canPublish = user?.role === 'EDITOR' || user?.role === 'ADMIN' || user?.role === 'SUPER_ADMIN';
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+
   const [articles, setArticles] = useState<EditorialArticle[]>([]);
   const [categories, setCategories] = useState<EditorialCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
@@ -72,7 +79,7 @@ export const EditorialPage: React.FC<EditorialPageProps> = ({ onNavigate }) => {
             <Newspaper className="w-3.5 h-3.5" />
             <span>Independent Science Journalism & Verification Desk</span>
           </div>
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white drop-shadow-sm">
             Gootiraa Editorial & Fact-Check Bureau
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
@@ -81,15 +88,27 @@ export const EditorialPage: React.FC<EditorialPageProps> = ({ onNavigate }) => {
           </p>
         </div>
 
-        {/* Fact check certification badge */}
-        <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 shrink-0 text-xs space-y-1 text-slate-300 max-w-xs">
-          <div className="font-bold text-teal-400 flex items-center gap-1.5">
-            <CheckCircle className="w-4 h-4 text-teal-400" />
-            <span>Transparent Methodology</span>
+        {/* Action Suite & Fact check certification badge */}
+        <div className="space-y-3 shrink-0 w-full md:w-auto max-w-xs">
+          {canPublish && (
+            <button
+              onClick={() => setCreateModalOpen(true)}
+              className="w-full py-2.5 px-4 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-2 shadow-md shadow-teal-950/40 transition-all active:scale-95"
+            >
+              <PenTool className="w-4 h-4 text-slate-950" />
+              <span>+ Write Article / Fact-Check</span>
+            </button>
+          )}
+
+          <div className="bg-slate-800/80 p-4 rounded-xl border border-slate-700 text-xs space-y-1 text-slate-300">
+            <div className="font-bold text-teal-400 flex items-center gap-1.5">
+              <CheckCircle className="w-4 h-4 text-teal-400" />
+              <span>Transparent Methodology</span>
+            </div>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Every fact-check links primary scientific sources and publishes full correction logs.
+            </p>
           </div>
-          <p className="text-[11px] text-slate-400">
-            Every fact-check links primary scientific sources and publishes full correction logs.
-          </p>
         </div>
       </div>
 
@@ -185,6 +204,18 @@ export const EditorialPage: React.FC<EditorialPageProps> = ({ onNavigate }) => {
           </article>
         ))}
       </div>
+
+      {/* Write & Publish Article / Fact-Check Modal */}
+      {createModalOpen && (
+        <CreateArticleModal
+          isOpen={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+          categories={categories}
+          onSuccess={() => {
+            loadEditorialData();
+          }}
+        />
+      )}
     </div>
   );
 };

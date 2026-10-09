@@ -21,10 +21,13 @@ import {
   Download,
   BookOpen,
   FileText,
+  Briefcase,
+  Coins,
 } from 'lucide-react';
 import { api } from '../api/client';
 import { AdminStats, AuditLog, WithdrawalRequest } from '../types';
 import { useAuth } from '../context/AuthContext';
+import { CreateBountyModal } from '../components/CreateBountyModal';
 
 export const AdminPage: React.FC = () => {
   const { user } = useAuth();
@@ -39,6 +42,7 @@ export const AdminPage: React.FC = () => {
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('');
   const [inspectingSub, setInspectingSub] = useState<any | null>(null);
+  const [createBountyModalOpen, setCreateBountyModalOpen] = useState(false);
 
   // Default active tab based on role
   const [activeTab, setActiveTab] = useState<'payouts' | 'users' | 'moderation' | 'logs' | 'providers'>(
@@ -177,13 +181,25 @@ export const AdminPage: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={loadDashboardData}
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg flex items-center gap-2 border border-slate-600 shrink-0 self-start sm:self-auto transition-colors"
-        >
-          <RefreshCw className="w-3.5 h-3.5" />
-          <span>Refresh Telemetry</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+          {(isSuperAdmin || user?.role === 'ADMIN') && (
+            <button
+              onClick={() => setCreateBountyModalOpen(true)}
+              className="px-3.5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 text-slate-950 text-xs font-bold rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+            >
+              <Briefcase className="w-3.5 h-3.5 text-slate-950" />
+              <span>+ Post Research Bounty</span>
+            </button>
+          )}
+
+          <button
+            onClick={loadDashboardData}
+            className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs font-semibold rounded-lg flex items-center gap-2 border border-slate-600 transition-colors"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh Telemetry</span>
+          </button>
+        </div>
       </div>
 
       {actionSuccess && (
@@ -827,6 +843,19 @@ export const AdminPage: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Create Research Bounty Modal */}
+      {createBountyModalOpen && (
+        <CreateBountyModal
+          isOpen={createBountyModalOpen}
+          onClose={() => setCreateBountyModalOpen(false)}
+          onSuccess={() => {
+            setActionSuccess('New research bounty successfully published and funded!');
+            loadDashboardData();
+            setTimeout(() => setActionSuccess(null), 3500);
+          }}
+        />
       )}
     </div>
   );
